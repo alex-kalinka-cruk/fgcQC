@@ -1,0 +1,14 @@
+Package: fgcQC
+Title: QC metric calculations for CRISPR screen data produced at the FGC
+Version: 0.1.0
+Authors@R: 
+    person(given = "Alex",
+           family = "Kalinka",
+           role = c("aut", "cre"),
+           email = "alex.kalinka@cancer.org.uk")
+Description: Implementations of QC metric calcluations pertaining to sequencing, laboratory, and analysis metrics; both standard and novel metrics are included.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Suggests: 
+    testthat
