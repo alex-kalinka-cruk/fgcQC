@@ -9,6 +9,7 @@
 #' @importFrom magrittr %<>%
 calc_GC_percent_library <- function(library){
   tryCatch({
+    guide_len <- nchar(library$V1[1])
     library %<>%
       dplyr::rowwise() %>%
       dplyr::mutate(GC_percent = 100*(sum(unlist(strsplit(V1,""))=="G") + sum(unlist(strsplit(V1,""))=="C"))/guide_len) %>%

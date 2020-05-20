@@ -13,7 +13,6 @@
 #' @export
 calc_dcorr_GC_content_counts <- function(counts, library){
   tryCatch({
-    guide_len <- nchar(library$V1[1])
     library %<>%
       calc_GC_percent_library() %>%
       dplyr::filter(V2 %in% counts$sgRNA)
