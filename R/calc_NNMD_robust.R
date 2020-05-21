@@ -1,6 +1,6 @@
 #' calc_NNMD_robust
 #'
-#' Calculates a robust equivalent of the Null-Normalized Mean Difference (NNMD; also known as Glass's delta) for the log fold change distributions of essential and non-essential genes - defined as the median difference divided by the median absolute deviation (MAD).
+#' Calculates a robust equivalent of the Null-Normalized Mean Difference (NNMD; also known as Glass's delta) for the log fold change distributions of essential and non-essential genes - defined as the median difference divided by the median absolute deviation (MAD) of non-essential genes (the reference set).
 #'
 #' @param data A data fram containing log fold change data (normalized in terms of library depth and any potential copy-number effects) for a set of genes.
 #' @param gene_col A character string indicating which column contains gene names.
