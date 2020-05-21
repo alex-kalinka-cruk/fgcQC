@@ -19,8 +19,8 @@ calc_log2_fold_change_gRNAs <- function(counts, ref, comp, pseudo_count = 5){
     stop(paste("unable to find",comp,"in column names of 'counts'"))
 
   tryCatch({
-   counts$ref_median <- apply(counts[,ref], 1, median)
-   counts$comp_median <- apply(counts[,comp], 1, median)
+   counts$ref_median <- apply(counts[,ref], 1, median, na.rm = T)
+   counts$comp_median <- apply(counts[,comp], 1, median, na.rm = T)
    counts %<>%
      dplyr::rowwise() %>%
      dplyr::mutate(log2FC = log2(ref_median + pseudo_count) - log2(comp_median + pseudo_count)) %>%
