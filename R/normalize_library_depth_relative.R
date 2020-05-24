@@ -18,9 +18,8 @@ normalize_library_depth_relative <- function(counts, norm_total){
       tot <- norm_total
     }
     csums <- colSums(counts[,3:ncol(counts)])
-    for(i in 3:ncol(counts)){
-      counts[,i] <- tot * counts[,i]/csums[(i-2)]
-    }
+    counts[,3:ncol(counts)] <- as.data.frame(t(apply(counts[,3:ncol(counts)],
+                                                     1, function(x) tot * x/csums)))
   },
   error = function(e) stop(paste("unable to normalize (relative) library depth:",e))
   )
