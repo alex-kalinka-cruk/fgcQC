@@ -15,7 +15,7 @@
 #' @param group A character string naming a column by which to group 'data'. If `NULL` no grouping, defaults to `NULL`.
 #'
 #' @return A data frame.
-#' @importFrom dplyr mutate summarise
+#' @importFrom dplyr mutate summarise group_by sym
 #' @importFrom magrittr %<>%
 #' @export
 calc_AUC <- function(data, score_col, group = NULL){
@@ -23,17 +23,22 @@ calc_AUC <- function(data, score_col, group = NULL){
     stop("expecting to find a 'TP' column in 'data'")
   if(!score_col %in% colnames(data))
     stop(paste("expecting to find a",score_col,"column in 'data'"))
-  if(!is.null(group)){
-    if(!group %in% colnames(data))
-      stop(paste("expecting to find a",group,"column"))
-    grp <- sym(group)
-  }
-  sc <- sym(score_col)
-  if(!is.null(group)){
+
+  tryCatch({
+    if(!is.null(group)){
+      if(!group %in% colnames(data))
+        stop(paste("expecting to find a",group,"column"))
+      grp <- dplyr::sym(group)
+    }
+    sc <- dplyr::sym(score_col)
+    if(!is.null(group)){
+      data %<>%
+        dplyr::group_by(!!grp)
+    }
     data %<>%
-      group_by(!!grp)
-  }
-  data %<>%
-      summarise(AUC = .get_auc(!!sc, TP))
+        dplyr::summarise(AUC = .get_auc(!!sc, TP))
+  },
+  error = function(e) stop(paste("unable to calculate AUROC:",e))
+  )
   return(data)
 }

@@ -10,7 +10,7 @@
 #' @export
 calc_gini_coefficient_counts <- function(counts){
   tryCatch({
-    gc <- apply(counts[,3:ncol(counts)], 2, ineq, type = "Gini")
+    gc <- apply(counts[,3:ncol(counts)], 2, ineq::ineq, type = "Gini")
     ret <- data.frame(SampleName = names(gc),
                       gini_coefficient_counts = gc)
     rownames(ret) <- NULL
