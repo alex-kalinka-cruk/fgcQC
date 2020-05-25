@@ -35,7 +35,8 @@ extract_analysis_comparisons <- function(json_list){
     dplyr::rowwise() %>%
     dplyr::do(data.frame(sample = .make_comparison_unit(., type = "samples", comparison = .$name),
                          class = .make_comparison_unit(., type = "type", comparison = .$name),
-                         comparison = .$name, stringsAsFactors = F)) %>%
+                         comparison = .$name, type = type[1], goal = goal[1],
+                         stringsAsFactors = F)) %>%
     dplyr::ungroup()
   return(comp)
 }

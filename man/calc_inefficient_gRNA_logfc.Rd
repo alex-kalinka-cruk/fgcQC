@@ -12,7 +12,7 @@ calc_inefficient_gRNA_logfc(logfc, library)
 \item{library}{A data frame containing the library file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID.}
 }
 \value{
-A data frame containing three columns: `SampleName`, `log2FC_GCC_ratio` and `log2FC_TT_ratio`.
+A data frame containing two columns: `log2FC_GCC_ratio` and `log2FC_TT_ratio`.
 }
 \description{
 Calculates the ratio of normalized counts for inefficient sgRNA PAM-proximal sequences relative to all guides (taking the median of each).

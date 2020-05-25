@@ -10,7 +10,7 @@ QC_fgc_crispr_data(
   bagel_ctrl_plasmid,
   bcl2fastq,
   library,
-  comparison,
+  comparison_name,
   output
 )
 }
@@ -25,12 +25,12 @@ QC_fgc_crispr_data(
 
 \item{library}{A valid path to a library tsv file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID (produced by the AZ-CRUK CRISPR reference data generation pipeline).}
 
-\item{comparison}{A character string naming a single comparison to extract QC data for (should correspond to the comparison name used in the analysis config JSON file).}
+\item{comparison_name}{A character string naming a single comparison to extract QC data for (should correspond to the comparison name used in the analysis config JSON file).}
 
 \item{output}{A character string giving an output file name for the csv results. If `NULL`, do not write out any results.}
 }
 \value{
-A data frame containing QC metrics as columns and samples as rows; this data will also be written out to the `output` file, if not `NULL`.
+A data frame containing QC metrics as columns and samples as rows; this data will also be written to the `output` file, if not `NULL`.
 }
 \description{
 Produce Quality Control (QC) metrics from FGC CRISPR screen data inputs: an analysis config JSON file, a combined counts csv file, a Bagel results tsv file (Control vs Plasmid), a gRNA library tsv file ('cleanr.tsv'), and one or more bcl2fastq2 output JSON files. QC output will be generated for a single named comparison.

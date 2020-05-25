@@ -10,11 +10,7 @@ extract_b2f_json(path)
 \item{path}{A valid path to a 'Stats.json' file produced by `bcl2fastq2`.}
 }
 \value{
-A list containing the following elements:
-`flowcell` - a data frame containing flowcell-level data.
-`run_info` - a data frame containing read lengths.
-`summary` - a data frame containing run-level QC metrics.
-`samples` - a data frame containing sample-level QC metrics.
+A data frame containing flowcell and sample-level sequencing metrics.
 }
 \description{
 Extracts Sequencing QC metrics from a `bcl2fastq2` 'Stats.json' file.

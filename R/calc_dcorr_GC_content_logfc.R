@@ -6,8 +6,8 @@
 #' @param library A data frame containing the library file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID.
 #'
 #' @return A data frame with a `SampleName` column and a `distcorr_GC_content_logfc` column.
-#' @importFrom dplyr mutate rowwise ungroup filter
-#' @importFrom energy dcor
+#' @importFrom dplyr filter
+#' @importFrom energy dcor2d
 #' @importFrom magrittr %<>%
 #' @references Szekely, G.J., Rizzo, M.L., and Bakirov, N.K. (2007), Measuring and Testing Dependence by Correlation of Distances, Annals of Statistics, Vol. 35 No. 6, pp. 2769-2794.
 #' @export
@@ -18,12 +18,9 @@ calc_dcorr_GC_content_logfc <- function(logfc, library){
       dplyr::filter(V2 %in% logfc$sgRNA)
     logfc %<>%
       dplyr::filter(sgRNA %in% library$V2)
-    ret <- data.frame(SampleName = colnames(logfc)[3:ncol(logfc)]) %>%
-      dplyr::rowwise() %>%
-      dplyr::mutate(distcorr_GC_content_logfc = energy::dcor2d(logfc[,colnames(logfc) == SampleName],
+    ret <- data.frame(distcorr_GC_content_logfc = energy::dcor2d(logfc$log2FC,
                                                                 library$GC_percent[match(logfc$sgRNA, library$V2)],
-                                                                type = "U")) %>%
-      dplyr::ungroup()
+                                                                type = "U"))
   },
   error = function(e) stop(paste("unable to calculate dist corr for GC vs logFC:",e))
   )

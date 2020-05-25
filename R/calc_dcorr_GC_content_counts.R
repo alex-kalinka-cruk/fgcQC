@@ -7,7 +7,7 @@
 #'
 #' @return A data frame with a `SampleName` column and a `distcorr_GC_content_counts` column.
 #' @importFrom dplyr %>% mutate rowwise ungroup filter
-#' @importFrom energy dcor
+#' @importFrom energy dcor2d
 #' @importFrom magrittr %<>%
 #' @references Szekely, G.J., Rizzo, M.L., and Bakirov, N.K. (2007), Measuring and Testing Dependence by Correlation of Distances, Annals of Statistics, Vol. 35 No. 6, pp. 2769-2794.
 #' @export
