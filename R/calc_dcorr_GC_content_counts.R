@@ -6,7 +6,7 @@
 #' @param library A data frame containing the library file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID.
 #'
 #' @return A data frame with a `SampleName` column and a `distcorr_GC_content_counts` column.
-#' @importFrom dplyr mutate rowwise ungroup filter
+#' @importFrom dplyr %>% mutate rowwise ungroup filter
 #' @importFrom energy dcor
 #' @importFrom magrittr %<>%
 #' @references Szekely, G.J., Rizzo, M.L., and Bakirov, N.K. (2007), Measuring and Testing Dependence by Correlation of Distances, Annals of Statistics, Vol. 35 No. 6, pp. 2769-2794.
@@ -14,7 +14,7 @@
 calc_dcorr_GC_content_counts <- function(counts, library){
   tryCatch({
     library %<>%
-      calc_GC_percent_library() %>%
+      fgcQC::calc_GC_percent_library() %>%
       dplyr::filter(V2 %in% counts$sgRNA)
     counts %<>%
       dplyr::filter(sgRNA %in% library$V2)

@@ -14,11 +14,11 @@
 calc_dcorr_GC_content_logfc <- function(logfc, library){
   tryCatch({
     library %<>%
-      calc_GC_percent_library() %>%
-      dplyr::filter(V2 %in% counts$sgRNA)
+      fgcQC::calc_GC_percent_library() %>%
+      dplyr::filter(V2 %in% logfc$sgRNA)
     logfc %<>%
       dplyr::filter(sgRNA %in% library$V2)
-    ret <- data.frame(SampleName = colnames(counts)[3:ncol(counts)]) %>%
+    ret <- data.frame(SampleName = colnames(logfc)[3:ncol(logfc)]) %>%
       dplyr::rowwise() %>%
       dplyr::mutate(distcorr_GC_content_logfc = energy::dcor2d(logfc[,colnames(logfc) == SampleName],
                                                                 library$GC_percent[match(logfc$sgRNA, library$V2)],
