@@ -13,9 +13,9 @@
 #' @importFrom magrittr %<>%
 #' @export
 calc_log2_fold_change_gRNAs <- function(counts, ref, comp, pseudo_count = 5){
-  if(!all(ref %in% colnames(counts)))
+  if(!any(ref %in% colnames(counts)))
     stop(paste("unable to find",ref,"in column names of 'counts'"))
-  if(!all(comp %in% colnames(counts)))
+  if(!any(comp %in% colnames(counts)))
     stop(paste("unable to find",comp,"in column names of 'counts'"))
 
   tryCatch({
@@ -23,7 +23,7 @@ calc_log2_fold_change_gRNAs <- function(counts, ref, comp, pseudo_count = 5){
    counts$comp_median <- apply(counts[,comp], 1, median, na.rm = T)
    counts %<>%
      dplyr::rowwise() %>%
-     dplyr::mutate(log2FC = log2(ref_median + pseudo_count) - log2(comp_median + pseudo_count)) %>%
+     dplyr::mutate(log2FC = log2(comp_median + pseudo_count) - log2(ref_median + pseudo_count)) %>%
      dplyr::ungroup()
   },
   error = function(e) stop(paste("unable to calculate log2 fold changes at the gene level:",e))

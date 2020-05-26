@@ -12,7 +12,7 @@ QC_fgc_crispr_data(
   library,
   comparison_name,
   output,
-  norm_method
+  norm_method = "median_ratio"
 )
 }
 \arguments{

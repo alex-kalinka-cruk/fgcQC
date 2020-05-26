@@ -23,8 +23,8 @@
 }
 
 
-.read_bcl2fastq <- function(b2f){
-  b2f <- strsplit(bcl2fastq,",")
+.read_bcl2fastq <- function(bcl2fastq){
+  b2f <- unlist(strsplit(bcl2fastq,","))
   ret <- NULL
   for(i in 1:length(b2f)){
     tryCatch(
@@ -36,8 +36,8 @@
 }
 
 
-.check_comparison <- function(comparisons, comparison_name){
-  if(!comparison_name %in% comparisons$name)
+.check_comparison <- function(comparisons, comparison_name, analysis_config){
+  if(!comparison_name %in% comparisons$comparison)
     stop(paste("unable to find comparison",comparison_name,"in",analysis_config))
   if(!"plasmid" %in% comparisons$class)
     stop(paste("unable to find any 'plasmid' samples in",comparison_name))
@@ -64,10 +64,10 @@
 #' @param norm_method A character string naming a normalization method for the count data. Can be `median_ratio` or `relative`. Defaults to `median_ratio`.
 #'
 #' @return A data frame containing QC metrics as columns and samples as rows; this data will also be written to the `output` file, if not `NULL`.
-#' @importFrom dplyr mutate select filter
+#' @importFrom dplyr mutate select filter right_join
 #' @export
 QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library,
-                               comparison_name, output, norm_method){
+                               comparison_name, output, norm_method = "median_ratio"){
   ## File path checks.
   .check_qc_inputs(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison_name, output, norm_method)
 
@@ -77,7 +77,12 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
 
   comparisons %<>%
     dplyr::filter(comparison == comparison_name)
-  .check_comparison(comparisons)
+  .check_comparison(comparisons, comparison_name, analysis_config)
+
+  # Prep qc data from analysis config.
+  qc_config <- json_list$qc %>%
+    dplyr::select(-indexes, -label) %>%
+    dplyr::filter(name %in% comparisons$sample)
 
   ## CI sequencing bcl2fastq2 output.
   tryCatch({
@@ -89,17 +94,23 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
                     SampleClass = comparisons$class[match(SampleName, comparisons$sample)]) %>%
       # Keep only samples in the given comparison.
       dplyr::filter(SampleName %in% comparisons$sample) %>%
-      dplyr::select(Flowcell,RunId,RunDate,read_lengths,LaneNumber,TotalClustersRaw,TotalClustersPF,ReadsPF_percent,
+      dplyr::right_join(qc_config, by = c("SampleName" = "name")) %>%
+      dplyr::select(slx_id,Flowcell,RunId,RunDate,read_lengths,LaneNumber,TotalClustersRaw,TotalClustersPF,ReadsPF_percent,
                     Non_Demultiplexed_Reads_percent,Q30_bases_samples_percent,
+                    virus_batch,plasmid_batch,cas_activity,minimum_split_cell_number,
                     SampleId,IndexSequence,SampleName,SampleLabel,SampleClass,NumberReads,Q30_bases_percent,
-                    Average_base_quality,Index_OneBaseMismatch_percent,Trimmed_bases_percent,Sample_Representation)
+                    Average_base_quality,Index_OneBaseMismatch_percent,Trimmed_bases_percent,Sample_Representation,
+                    cell_population_doublings,index_plate,index_plate_well_id,library_dna_yield_ng.ul)
   },
   error = function(e) stop(paste("unable to build bcl2fastq data frame:",e))
   )
+
+  return(b2f)
+
   # Besides the plasmid (usually won't be sequenced), are any samples missing?
   miss_samps <- setdiff(comparisons$sample[comparisons$class!="plasmid"], b2f$SampleName)
   if(length(miss_samps) > 0){
-
+    stop(paste("could not find the following comparison samples in the sequencing output (bcl2fastq):",miss_samps))
   }
 
   # Output determined by screen type.
@@ -108,16 +119,17 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
     tryCatch(counts <- read.delim(combined_counts, sep="\t", header=T, stringsAsFactors = F),
              error = function(e) stop(paste("unable to read combined counts file",combined_counts,":",e)))
     if(norm_method == "median_ratio"){
-      counts_norm <- normalize_library_depth_median_ratio(counts)
+      counts_norm <- fgcQC::normalize_library_depth_median_ratio(counts)
     }else{
-      counts_norm <- normalize_library_depth_relative(counts, 2e7)
+      counts_norm <- fgcQC::normalize_library_depth_relative(counts, 2e7)
     }
 
     ## Log fold change at gRNA and gene levels.
     control_samp <- comparisons$sample[comparisons$class == "control"]
-    plasmid_samps <- comparisons$sample[comparisons$class == "plasmid"]
+    plasmid_samp <- comparisons$sample[comparisons$class == "plasmid"]
     # 1. Control vs Plasmid.
-
+    lfc.ctrl_pl <- fgcQC::calc_log2_fold_change_gRNAs(counts, ref = plasmid_samp, comp = control_samp)
+    lfc.ctrl_pl.genes <- fgcQC::calc_log2_fold_change_genes(lfc.ctrl_pl)
   }else{
 
   }
