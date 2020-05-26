@@ -5,21 +5,28 @@
 }
 
 
-.check_qc_inputs <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison, output, norm_method){
+.check_qc_inputs <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison, output, norm_method,
+                             html_report, historical_data){
   .file_exists(analysis_config)
   .file_exists(combined_counts)
   .file_exists(bagel_ctrl_plasmid)
   .file_exists(library)
   if(!is.character(bcl2fastq))
     stop("'bcl2fastq' must be a character string pointing to one or more bcl2fastq2 output JSON files separated by commas")
-  b2f <- strsplit(bcl2fastq,",")
-  lapply(b2f, .file_exists)
+  b2f <- unlist(strsplit(bcl2fastq,","))
+  sapply(b2f, .file_exists)
   if(!is.character(comparison))
     stop("'comparison_name' must be a character string naming a comparison in the analysis config JSON file")
   if(!is.character(output) & !is.null(output))
     stop("'output' must be a character string naming an output file for QC results or NULL")
   if(!norm_method %in% c("median_ratio","relative"))
     stop("'norm_method' should be one of 'median_ratio' or 'relative'")
+  if(!is.logical(html_report))
+    stop(paste("'html_report' should be TRUE or FALSE, not:",html_report))
+  if(html_report){
+    if(!inherits(historical_data,"data.frame"))
+      stop(paste("if an html report is to be produced, 'historical_data' should be a data frame of historical QC data, not an object of class:",class(historical_data)))
+  }
 }
 
 
@@ -29,7 +36,7 @@
   for(i in 1:length(b2f)){
     tryCatch(
       ret <- rbind(ret, fgcQC::extract_b2f_json(b2f[i])),
-      error = function(e) stop(paste("unable to read bcl2fastq2 data:",e))
+      error = function(e) stop(paste("problem reading bcl2fastq2 data:",e))
     )
   }
   return(ret)
@@ -52,7 +59,7 @@
 
 #' QC_fgc_crispr_data
 #'
-#' Produce Quality Control (QC) metrics from FGC CRISPR screen data inputs: an analysis config JSON file, a combined counts csv file, a Bagel results tsv file (Control vs Plasmid), a gRNA library tsv file ('cleanr.tsv'), and one or more bcl2fastq2 output JSON files. QC output will be generated for a single named comparison.
+#' Produce Quality Control (QC) metrics from the following FGC CRISPR screen data inputs: an analysis config JSON file, a combined counts csv file, a Bagel results tsv file (Control vs Plasmid), a gRNA library tsv file ('cleanr.tsv'), and one or more bcl2fastq2 output JSON files ('Stats.json'). QC output will be returned for a single named comparison.
 #'
 #' @param analysis_config A path to a valid analysis config JSON file to be used as input for the AZ-CRUK CRISPR analysis pipeline.
 #' @param combined_counts A path to a valid combined counts csv file (produced by the AZ-CRUK CRISPR analysis pipeline).
@@ -62,14 +69,22 @@
 #' @param comparison_name A character string naming a single comparison to extract QC data for (should correspond to the comparison name used in the analysis config JSON file).
 #' @param output A character string giving an output file name for the csv results. If `NULL`, do not write out any results.
 #' @param norm_method A character string naming a normalization method for the count data. Can be `median_ratio` or `relative`. Defaults to `median_ratio`.
+#' @param html_report A logical indicating whether an HTML report for the focal comparison should be produced. Defaults to `FALSE`.
+#' @param historical_data If `html_report` is `TRUE` then a data frame of historical QC data to be used in the report. Set to `NULL` if `html_report` is `FALSE`. Defaults to `NULL`.
 #'
-#' @return A data frame containing QC metrics as columns and samples as rows; this data will also be written to the `output` file, if not `NULL`.
+#' @return A list containing the following elements:
+#' `qc_metrics` - A data frame containing QC metrics as columns and samples as rows; this data will also be written to the `output` file, if not `NULL`.
+#' `comparisons` - A data frame of samples belonging to the focal comparison.
+#' `seq_metrics` - A data frame of CI sequencing metrics at both flowcell and sample levels.
+#' `log2FC` - A list containing logFC data frames at the gRNA and gene level.
 #' @importFrom dplyr mutate select filter right_join
 #' @export
 QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library,
-                               comparison_name, output, norm_method = "median_ratio"){
+                               comparison_name, output, norm_method = "median_ratio",
+                               html_report = FALSE, historical_data = NULL){
   ## File path checks.
-  .check_qc_inputs(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison_name, output, norm_method)
+  .check_qc_inputs(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison_name, output, norm_method,
+                   html_report, historical_data)
 
   ## Analysis config.
   json_list <- fgcQC::read_analysis_config_json(analysis_config)
@@ -92,11 +107,18 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
                     SampleName = json_list$samples$name[match(SampleId, json_list$samples$indexes)],
                     SampleLabel = json_list$samples$label[match(SampleId, json_list$samples$indexes)]) %>%
       # Keep only samples in the given comparison.
-      dplyr::filter(SampleName %in% comparisons$sample) %>%
+      dplyr::filter(SampleName %in% comparisons$sample)
+
+    if(any(!b2f$SampleName %in% qc_config$name))
+      stop(paste("analysis config QC data missing for:",b2f$SampleName[!b2f$SampleName %in% qc_config$name]))
+
+    qc_metrics <- b2f %>%
+      # Fold in QC data from analysis config.
       dplyr::right_join(qc_config, by = c("SampleName" = "name")) %>%
       dplyr::mutate(SampleClass = comparisons$class[match(SampleName, comparisons$sample)],
                     SampleLabel = ifelse(SampleClass == "plasmid",SampleName,SampleLabel)) %>%
-      dplyr::select(slx_id,Flowcell,RunId,RunDate,read_lengths,LaneNumber,TotalClustersRaw,TotalClustersPF,ReadsPF_percent,
+      dplyr::select(slx_id,screen_type,screen_goal,
+                    Flowcell,RunId,RunDate,read_lengths,LaneNumber,TotalClustersRaw,TotalClustersPF,ReadsPF_percent,
                     Non_Demultiplexed_Reads_percent,Q30_bases_samples_percent,
                     virus_batch,plasmid_batch,cas_activity,minimum_split_cell_number,
                     SampleId,IndexSequence,SampleName,SampleLabel,SampleClass,NumberReads,Q30_bases_percent,
@@ -106,10 +128,8 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
   error = function(e) stop(paste("unable to build bcl2fastq data frame:",e))
   )
 
-  return(b2f)
-
-  # Besides the plasmid (usually won't be sequenced), are any samples missing?
-  miss_samps <- setdiff(comparisons$sample[comparisons$class!="plasmid"], b2f$SampleName)
+  # Are any samples missing?
+  miss_samps <- setdiff(comparisons$sample, qc_metrics$SampleName)
   if(length(miss_samps) > 0){
     stop(paste("could not find the following comparison samples in the sequencing output (bcl2fastq):",miss_samps))
   }
@@ -125,14 +145,49 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       counts_norm <- fgcQC::normalize_library_depth_relative(counts, 2e7)
     }
 
-    ## Log fold change at gRNA and gene levels.
+    ## Log2 fold change at gRNA and gene levels.
     control_samp <- comparisons$sample[comparisons$class == "control"]
     plasmid_samp <- comparisons$sample[comparisons$class == "plasmid"]
     # 1. Control vs Plasmid.
-    lfc.ctrl_pl <- fgcQC::calc_log2_fold_change_gRNAs(counts, ref = plasmid_samp, comp = control_samp)
+    lfc.ctrl_pl <- fgcQC::calc_log2_fold_change_gRNAs(counts_norm, ref = plasmid_samp, comp = control_samp)
     lfc.ctrl_pl.genes <- fgcQC::calc_log2_fold_change_genes(lfc.ctrl_pl)
+
+    # Add 'treatment' samples if screen goal is not 'lethality'.
+    if(comparisons$goal[1] != "lethality"){
+      treat_samp <- comparisons$sample[comparisons$class == "treatment"]
+      # 2. Treatment vs Plasmid.
+      lfc.treat_pl <- fgcQC::calc_log2_fold_change_gRNAs(counts_norm, ref = plasmid_samp, comp = treat_samp)
+      lfc.treat_pl.genes <- fgcQC::calc_log2_fold_change_genes(lfc.treat_pl)
+    }
+
   }else{
 
   }
 
+  # Write out QC metrics to a csv file.
+  if(!is.null(output)){
+    tryCatch(
+      write.csv(qc_metrics, file = output, row.names=F, quote=F),
+      error = function(e) stop(paste("unable to write QC metric results to:",output,":",e))
+    )
+  }
+
+  # Build return object.
+  ret <- list()
+  ret$qc_metrics <- qc_metrics
+  ret$comparisons <- comparisons
+  ret$seq_metrics <- b2f
+  if(comparisons$type[1] == "n"){
+    ret$log2FC <- list()
+    ret$log2FC$control_vs_plasmid.gRNA <- lfc.ctrl_pl
+    ret$log2FC$control_vs_plasmid.gene <- lfc.ctrl_pl.genes
+    if(comparisons$goal[1] != "lethality"){
+      ret$log2FC$treatment_vs_plasmid.gRNA <- lfc.treat_pl
+      ret$log2FC$treatment_vs_plasmid.gene <- lfc.treat_pl.genes
+    }
+  }else{
+    ret$log2FC <- NA
+  }
+  class(ret) <- "fgcQC"
+  return(ret)
 }

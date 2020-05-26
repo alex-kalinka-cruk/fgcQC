@@ -12,7 +12,9 @@ QC_fgc_crispr_data(
   library,
   comparison_name,
   output,
-  norm_method = "median_ratio"
+  norm_method = "median_ratio",
+  html_report = FALSE,
+  historical_data = NULL
 )
 }
 \arguments{
@@ -31,10 +33,18 @@ QC_fgc_crispr_data(
 \item{output}{A character string giving an output file name for the csv results. If `NULL`, do not write out any results.}
 
 \item{norm_method}{A character string naming a normalization method for the count data. Can be `median_ratio` or `relative`. Defaults to `median_ratio`.}
+
+\item{html_report}{A logical indicating whether an HTML report for the focal comparison should be produced. Defaults to `FALSE`.}
+
+\item{historical_data}{If `html_report` is `TRUE` then a data frame of historical QC data to be used in the report. Set to `NULL` if `html_report` is `FALSE`. Defaults to `NULL`.}
 }
 \value{
-A data frame containing QC metrics as columns and samples as rows; this data will also be written to the `output` file, if not `NULL`.
+A list containing the following elements:
+`qc_metrics` - A data frame containing QC metrics as columns and samples as rows; this data will also be written to the `output` file, if not `NULL`.
+`comparisons` - A data frame of samples belonging to the focal comparison.
+`seq_metrics` - A data frame of CI sequencing metrics at both flowcell and sample levels.
+`log2FC` - A list containing logFC data frames at the gRNA and gene level.
 }
 \description{
-Produce Quality Control (QC) metrics from FGC CRISPR screen data inputs: an analysis config JSON file, a combined counts csv file, a Bagel results tsv file (Control vs Plasmid), a gRNA library tsv file ('cleanr.tsv'), and one or more bcl2fastq2 output JSON files. QC output will be generated for a single named comparison.
+Produce Quality Control (QC) metrics from the following FGC CRISPR screen data inputs: an analysis config JSON file, a combined counts csv file, a Bagel results tsv file (Control vs Plasmid), a gRNA library tsv file ('cleanr.tsv'), and one or more bcl2fastq2 output JSON files ('Stats.json'). QC output will be returned for a single named comparison.
 }

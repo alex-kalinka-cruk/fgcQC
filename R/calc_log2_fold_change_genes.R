@@ -6,7 +6,7 @@
 #'
 #' @return A data frame with a column named `log2FC_gene`.
 #'
-#' @importFrom dplyr mutate group_by ungroup
+#' @importFrom dplyr summarise group_by ungroup
 #' @importFrom magrittr %<>%
 #' @export
 calc_log2_fold_change_genes <- function(logfc){
@@ -15,9 +15,13 @@ calc_log2_fold_change_genes <- function(logfc){
   if(!"gene" %in% colnames(logfc))
     stop("expecting a column named 'gene' in input")
 
-  logfc %<>%
-    dplyr::group_by(gene) %>%
-    dplyr::mutate(log2FC_gene = median(log2FC, na.rm=T)) %>%
-    dplyr::ungroup()
+  tryCatch({
+    logfc %<>%
+      dplyr::group_by(gene) %>%
+      dplyr::summarise(log2FC_gene = median(log2FC, na.rm=T)) %>%
+      dplyr::ungroup()
+  },
+  error = function(e) stop(paste("unable to calculate log2 fold changes at the gene level:",e))
+  )
   return(logfc)
 }

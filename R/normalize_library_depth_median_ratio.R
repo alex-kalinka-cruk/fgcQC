@@ -12,7 +12,7 @@
 #' @param counts A data frame of counts for each sample in the study (samples as columns, gRNAs as rows).
 #'
 #' @return A data frame with 1 row and as many columns as `counts` with size factors for each experiment.
-#' @importFrom dplyr mutate summarise select
+#' @importFrom dplyr mutate summarise select vars funs
 #' @importFrom purrr pmap_dbl
 #' @export
 calc_median_normalization_size_factors <- function(counts){
@@ -21,9 +21,9 @@ calc_median_normalization_size_factors <- function(counts){
       .l = dplyr::select(., -sgRNA, -gene),
       .f = .geom_mean
     )) %>%
-    dplyr::mutate_at(vars(-sgRNA, -gene, -geom_mean),
-                     funs(. / geom_mean)) %>%
-    dplyr::summarise_at(vars(-sgRNA, -gene, -geom_mean),
+    dplyr::mutate_at(dplyr::vars(-sgRNA, -gene, -geom_mean),
+                     dplyr::funs(. / geom_mean)) %>%
+    dplyr::summarise_at(dplyr::vars(-sgRNA, -gene, -geom_mean),
                         median)
   return(size_factors)
 }
