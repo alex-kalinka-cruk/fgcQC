@@ -27,6 +27,7 @@
 #'
 #' @return A data frame containing sample comparisons.
 #' @importFrom dplyr rowwise ungroup do
+#' @export
 extract_analysis_comparisons <- function(json_list){
   if(!inherits(json_list, "list") || !"comparisons" %in% names(json_list) || !inherits(json_list$comparisons,"data.frame"))
     stop("'json_list' should be a list produced by the 'fgcQC::read_analysis_config_json' function")
@@ -35,7 +36,7 @@ extract_analysis_comparisons <- function(json_list){
     dplyr::rowwise() %>%
     dplyr::do(data.frame(sample = .make_comparison_unit(., type = "samples", comparison = .$name),
                          class = .make_comparison_unit(., type = "type", comparison = .$name),
-                         comparison = .$name, type = type[1], goal = goal[1],
+                         comparison = .$name, type = .$type[1], goal = .$goal[1],
                          stringsAsFactors = F)) %>%
     dplyr::ungroup()
   return(comp)

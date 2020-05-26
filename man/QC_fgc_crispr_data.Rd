@@ -11,7 +11,8 @@ QC_fgc_crispr_data(
   bcl2fastq,
   library,
   comparison_name,
-  output
+  output,
+  norm_method
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ QC_fgc_crispr_data(
 \item{comparison_name}{A character string naming a single comparison to extract QC data for (should correspond to the comparison name used in the analysis config JSON file).}
 
 \item{output}{A character string giving an output file name for the csv results. If `NULL`, do not write out any results.}
+
+\item{norm_method}{A character string naming a normalization method for the count data. Can be `median_ratio` or `relative`. Defaults to `median_ratio`.}
 }
 \value{
 A data frame containing QC metrics as columns and samples as rows; this data will also be written to the `output` file, if not `NULL`.

@@ -5,7 +5,7 @@
 }
 
 
-.check_qc_inputs <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison, output){
+.check_qc_inputs <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison, output, norm_method){
   .file_exists(analysis_config)
   .file_exists(combined_counts)
   .file_exists(bagel_ctrl_plasmid)
@@ -15,9 +15,11 @@
   b2f <- strsplit(bcl2fastq,",")
   lapply(b2f, .file_exists)
   if(!is.character(comparison))
-    stop("'comparison' must be a character string naming a comparison in the analysis config JSON file")
+    stop("'comparison_name' must be a character string naming a comparison in the analysis config JSON file")
   if(!is.character(output) & !is.null(output))
     stop("'output' must be a character string naming an output file for QC results or NULL")
+  if(!norm_method %in% c("median_ratio","relative"))
+    stop("'norm_method' should be one of 'median_ratio' or 'relative'")
 }
 
 
@@ -27,10 +29,24 @@
   for(i in 1:length(b2f)){
     tryCatch(
       ret <- rbind(ret, fgcQC::extract_b2f_json(b2f[i])),
-      error = function(e) stop(paste("unable to build bcl2fastq2 data frame:",e))
+      error = function(e) stop(paste("unable to read bcl2fastq2 data:",e))
     )
   }
   return(ret)
+}
+
+
+.check_comparison <- function(comparisons, comparison_name){
+  if(!comparison_name %in% comparisons$name)
+    stop(paste("unable to find comparison",comparison_name,"in",analysis_config))
+  if(!"plasmid" %in% comparisons$class)
+    stop(paste("unable to find any 'plasmid' samples in",comparison_name))
+  if(!"control" %in% comparisons$class)
+    stop(paste("unable to find any 'control' samples in",comparison_name))
+  if(comparisons$goal[1] != "lethality"){
+    if(!"treatment" %in% comparisons$class)
+      stop(paste("unable to find any 'treatment' samples in",comparison_name))
+  }
 }
 
 
@@ -45,35 +61,65 @@
 #' @param library A valid path to a library tsv file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID (produced by the AZ-CRUK CRISPR reference data generation pipeline).
 #' @param comparison_name A character string naming a single comparison to extract QC data for (should correspond to the comparison name used in the analysis config JSON file).
 #' @param output A character string giving an output file name for the csv results. If `NULL`, do not write out any results.
+#' @param norm_method A character string naming a normalization method for the count data. Can be `median_ratio` or `relative`. Defaults to `median_ratio`.
 #'
 #' @return A data frame containing QC metrics as columns and samples as rows; this data will also be written to the `output` file, if not `NULL`.
 #' @importFrom dplyr mutate select filter
 #' @export
-QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison_name, output){
-  # File path checks.
-  .check_qc_inputs(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison_name, output)
+QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library,
+                               comparison_name, output, norm_method){
+  ## File path checks.
+  .check_qc_inputs(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison_name, output, norm_method)
 
-  # Analysis config.
+  ## Analysis config.
   json_list <- fgcQC::read_analysis_config_json(analysis_config)
   comparisons <- fgcQC::extract_analysis_comparisons(json_list)
-  if(!comparison_name %in% comparisons$name)
-    stop(paste("unable to find comparison",comparison_name,"in",analysis_config))
+
   comparisons %<>%
     dplyr::filter(comparison == comparison_name)
+  .check_comparison(comparisons)
 
-  # CI sequencing bcl2fastq2 output.
-  b2f <- .read_bcl2fastq(bcl2fastq) %>%
-    dplyr::mutate(screen_type = comparisons$type[1],
-                  screen_goal = comparisons$goal[1],
-                  SampleName = json_list$samples$name[match(SampleId, json_list$samples$indexes)],
-                  SampleLabel = json_list$samples$label[match(SampleId, json_list$samples$indexes)],
-                  SampleClass = comparisons$class[match(SampleName, comparisons$sample)]) %>%
-    # Keep only samples in the given comparison.
-    dplyr::filter(SampleName %in% comparisons$sample) %>%
-    dplyr::select(Flowcell,RunId,RunDate,read_lengths,LaneNumber,TotalClustersRaw,TotalClustersPF,ReadsPF_percent,
-                  Non_Demultiplexed_Reads_percent,Q30_bases_samples_percent,
-                  SampleId,IndexSequence,SampleName,SampleLabel,SampleClass,NumberReads,Q30_bases_percent,
-                  Average_base_quality,Index_OneBaseMismatch_percent,Trimmed_bases_percent,Sample_Representation)
+  ## CI sequencing bcl2fastq2 output.
+  tryCatch({
+    b2f <- .read_bcl2fastq(bcl2fastq) %>%
+      dplyr::mutate(screen_type = comparisons$type[1],
+                    screen_goal = comparisons$goal[1],
+                    SampleName = json_list$samples$name[match(SampleId, json_list$samples$indexes)],
+                    SampleLabel = json_list$samples$label[match(SampleId, json_list$samples$indexes)],
+                    SampleClass = comparisons$class[match(SampleName, comparisons$sample)]) %>%
+      # Keep only samples in the given comparison.
+      dplyr::filter(SampleName %in% comparisons$sample) %>%
+      dplyr::select(Flowcell,RunId,RunDate,read_lengths,LaneNumber,TotalClustersRaw,TotalClustersPF,ReadsPF_percent,
+                    Non_Demultiplexed_Reads_percent,Q30_bases_samples_percent,
+                    SampleId,IndexSequence,SampleName,SampleLabel,SampleClass,NumberReads,Q30_bases_percent,
+                    Average_base_quality,Index_OneBaseMismatch_percent,Trimmed_bases_percent,Sample_Representation)
+  },
+  error = function(e) stop(paste("unable to build bcl2fastq data frame:",e))
+  )
+  # Besides the plasmid (usually won't be sequenced), are any samples missing?
+  miss_samps <- setdiff(comparisons$sample[comparisons$class!="plasmid"], b2f$SampleName)
+  if(length(miss_samps) > 0){
 
+  }
+
+  # Output determined by screen type.
+  if(comparisons$type[1] == "n"){
+    ## Read and normalize counts.
+    tryCatch(counts <- read.delim(combined_counts, sep="\t", header=T, stringsAsFactors = F),
+             error = function(e) stop(paste("unable to read combined counts file",combined_counts,":",e)))
+    if(norm_method == "median_ratio"){
+      counts_norm <- normalize_library_depth_median_ratio(counts)
+    }else{
+      counts_norm <- normalize_library_depth_relative(counts, 2e7)
+    }
+
+    ## Log fold change at gRNA and gene levels.
+    control_samp <- comparisons$sample[comparisons$class == "control"]
+    plasmid_samps <- comparisons$sample[comparisons$class == "plasmid"]
+    # 1. Control vs Plasmid.
+
+  }else{
+
+  }
 
 }
