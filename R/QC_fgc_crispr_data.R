@@ -90,11 +90,12 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       dplyr::mutate(screen_type = comparisons$type[1],
                     screen_goal = comparisons$goal[1],
                     SampleName = json_list$samples$name[match(SampleId, json_list$samples$indexes)],
-                    SampleLabel = json_list$samples$label[match(SampleId, json_list$samples$indexes)],
-                    SampleClass = comparisons$class[match(SampleName, comparisons$sample)]) %>%
+                    SampleLabel = json_list$samples$label[match(SampleId, json_list$samples$indexes)]) %>%
       # Keep only samples in the given comparison.
       dplyr::filter(SampleName %in% comparisons$sample) %>%
       dplyr::right_join(qc_config, by = c("SampleName" = "name")) %>%
+      dplyr::mutate(SampleClass = comparisons$class[match(SampleName, comparisons$sample)],
+                    SampleLabel = ifelse(SampleClass == "plasmid",SampleName,SampleLabel)) %>%
       dplyr::select(slx_id,Flowcell,RunId,RunDate,read_lengths,LaneNumber,TotalClustersRaw,TotalClustersPF,ReadsPF_percent,
                     Non_Demultiplexed_Reads_percent,Q30_bases_samples_percent,
                     virus_batch,plasmid_batch,cas_activity,minimum_split_cell_number,
