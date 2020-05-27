@@ -77,7 +77,7 @@
 #' `comparisons` - A data frame of samples belonging to the focal comparison.
 #' `seq_metrics` - A data frame of CI sequencing metrics at both flowcell and sample levels.
 #' `log2FC` - A list containing normalized counts and logFC data frames at both the gRNA and gene level.
-#' @importFrom dplyr mutate select filter right_join left_join
+#' @importFrom dplyr mutate select filter right_join left_join everything
 #' @importFrom tibble add_column
 #' @importFrom magrittr %<>%
 #' @export
@@ -93,6 +93,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
   comparisons <- fgcQC::extract_analysis_comparisons(json_list)
 
   comparisons %<>%
+    # Limit to samples in given comparison.
     dplyr::filter(comparison == comparison_name)
   .check_comparison(comparisons, comparison_name, analysis_config)
 
@@ -104,6 +105,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
   ### QC for sequencing metrics (bcl2fastq2 output).
   tryCatch({
     b2f <- .read_bcl2fastq(bcl2fastq) %>%
+      fgcQC::summarise_samples_bcl2fastq() %>%
       dplyr::mutate(screen_type = comparisons$type[1],
                     screen_goal = comparisons$goal[1],
                     SampleName = json_list$samples$name[match(SampleId, json_list$samples$indexes)],
@@ -120,12 +122,10 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       dplyr::mutate(SampleClass = comparisons$class[match(SampleName, comparisons$sample)],
                     SampleLabel = ifelse(SampleClass == "plasmid",SampleName,SampleLabel)) %>%
       dplyr::select(slx_id,screen_type,screen_goal,
-                    Flowcell,RunId,RunDate,read_lengths,LaneNumber,TotalClustersRaw,TotalClustersPF,ReadsPF_percent,
-                    Non_Demultiplexed_Reads_percent,Q30_bases_samples_percent,
+                    Flowcell:Q30_bases_samples_percent,
                     virus_batch,plasmid_batch,cas_activity,minimum_split_cell_number,
-                    SampleId,IndexSequence,SampleName,SampleLabel,SampleClass,NumberReads,Q30_bases_percent,
-                    Average_base_quality,Index_OneBaseMismatch_percent,Trimmed_bases_percent,Sample_Representation,
-                    cell_population_doublings,index_plate,index_plate_well_id,library_dna_yield_ng.ul)
+                    SampleId,SampleName,SampleLabel,SampleClass,
+                    dplyr::everything())
   },
   error = function(e) stop(paste("unable to build bcl2fastq data frame:",e))
   )
@@ -146,6 +146,9 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
     }else{
       counts_norm <- fgcQC::normalize_library_depth_relative(counts, 2e7)
     }
+
+    # Read in library file.
+    library <- read.delim(library, skip = 1, header=F, stringsAsFactors = F)
 
     ## Log2 fold change at gRNA and gene levels.
     control_samp <- comparisons$sample[comparisons$class == "control"]
@@ -170,7 +173,11 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       ## Percent reads matching gRNAs.
       fgcQC::calc_percent_matching_gRNAs(counts) %>%
       ## Gini coefficients.
-      dplyr::left_join(fgcQC::calc_gini_coefficient_counts(counts), by = "SampleName")
+      dplyr::left_join(fgcQC::calc_gini_coefficient_counts(counts), by = "SampleName") %>%
+      ## distance correlation between gRNA counts and GC content.
+      dplyr::left_join(fgcQC::calc_dcorr_GC_content_counts(counts_norm, library), by = "SampleName") %>%
+      ## inefficient gRNA (GCC and TT) count ratios.
+      dplyr::left_join(fgcQC::calc_inefficient_gRNA_count_ratios(counts_norm, library), by = "SampleName")
 
 
   }else{
