@@ -43,7 +43,7 @@ A list containing the following elements:
 `qc_metrics` - A data frame containing QC metrics as columns and samples as rows; this data will also be written to the `output` file, if not `NULL`.
 `comparisons` - A data frame of samples belonging to the focal comparison.
 `seq_metrics` - A data frame of CI sequencing metrics at both flowcell and sample levels.
-`log2FC` - A list containing logFC data frames at the gRNA and gene level.
+`log2FC` - A list containing normalized counts and logFC data frames at both the gRNA and gene level.
 }
 \description{
 Produce Quality Control (QC) metrics from the following FGC CRISPR screen data inputs: an analysis config JSON file, a combined counts csv file, a Bagel results tsv file (Control vs Plasmid), a gRNA library tsv file ('cleanr.tsv'), and one or more bcl2fastq2 output JSON files ('Stats.json'). QC output will be returned for a single named comparison.

@@ -7,7 +7,7 @@
 calc_percent_matching_gRNAs(b2f_samples, counts)
 }
 \arguments{
-\item{b2f_samples}{A data frame of sample information derived from `bcl2fastq2` output - see `extract_b2f_json`. The `SampleName` column should have been replaced with sample names hailing from the analysis config.}
+\item{b2f_samples}{A data frame of sample information derived from `bcl2fastq2` output - see `fgcQC::extract_b2f_json`. The `SampleName` column should have been replaced with sample names hailing from the analysis config.}
 
 \item{counts}{A data frame of counts for each sample in the study (samples as columns, gRNAs as rows).}
 }

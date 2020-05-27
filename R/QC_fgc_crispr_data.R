@@ -76,8 +76,10 @@
 #' `qc_metrics` - A data frame containing QC metrics as columns and samples as rows; this data will also be written to the `output` file, if not `NULL`.
 #' `comparisons` - A data frame of samples belonging to the focal comparison.
 #' `seq_metrics` - A data frame of CI sequencing metrics at both flowcell and sample levels.
-#' `log2FC` - A list containing logFC data frames at the gRNA and gene level.
-#' @importFrom dplyr mutate select filter right_join
+#' `log2FC` - A list containing normalized counts and logFC data frames at both the gRNA and gene level.
+#' @importFrom dplyr mutate select filter right_join left_join
+#' @importFrom tibble add_column
+#' @importFrom magrittr %<>%
 #' @export
 QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library,
                                comparison_name, output, norm_method = "median_ratio",
@@ -99,7 +101,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
     dplyr::select(-indexes, -label) %>%
     dplyr::filter(name %in% comparisons$sample)
 
-  ## CI sequencing bcl2fastq2 output.
+  ### QC for sequencing metrics (bcl2fastq2 output).
   tryCatch({
     b2f <- .read_bcl2fastq(bcl2fastq) %>%
       dplyr::mutate(screen_type = comparisons$type[1],
@@ -159,6 +161,17 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       lfc.treat_pl <- fgcQC::calc_log2_fold_change_gRNAs(counts_norm, ref = plasmid_samp, comp = treat_samp)
       lfc.treat_pl.genes <- fgcQC::calc_log2_fold_change_genes(lfc.treat_pl)
     }
+
+    ### QC for count data.
+    ## Zero and low count plasmid gRNAs.
+    qc_metrics %<>%
+      tibble::add_column(fgcQC::calc_low_zero_count_plasmid_gRNAs(counts, plasmid_samp),
+                       .before = "SampleId") %>%
+      ## Percent reads matching gRNAs.
+      fgcQC::calc_percent_matching_gRNAs(counts) %>%
+      ## Gini coefficients.
+      dplyr::left_join(fgcQC::calc_gini_coefficient_counts(counts), by = "SampleName")
+
 
   }else{
 

@@ -12,7 +12,8 @@ calc_gini_coefficient_counts <- function(counts){
   tryCatch({
     gc <- apply(counts[,3:ncol(counts)], 2, ineq::ineq, type = "Gini")
     ret <- data.frame(SampleName = names(gc),
-                      gini_coefficient_counts = gc)
+                      gini_coefficient_counts = gc,
+                      stringsAsFactors = FALSE)
     rownames(ret) <- NULL
   },
   error = function(e) stop(paste("unable to calculate Gini coefficients:",e))
