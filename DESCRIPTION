@@ -18,4 +18,6 @@ Imports:
     tibble,
     purrr,
     jsonlite,
-    ineq
+    ineq,
+    rlang,
+    energy

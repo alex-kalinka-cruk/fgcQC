@@ -165,9 +165,9 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       lfc.treat_pl.genes <- fgcQC::calc_log2_fold_change_genes(lfc.treat_pl)
     }
 
-    ### QC for count data.
-    ## Zero and low count plasmid gRNAs.
     qc_metrics %<>%
+      ### QC for count data.
+      ## Zero and low count plasmid gRNAs.
       tibble::add_column(fgcQC::calc_low_zero_count_plasmid_gRNAs(counts, plasmid_samp),
                        .before = "SampleId") %>%
       ## Percent reads matching gRNAs.
@@ -177,7 +177,14 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       ## distance correlation between gRNA counts and GC content.
       dplyr::left_join(fgcQC::calc_dcorr_GC_content_counts(counts_norm, library), by = "SampleName") %>%
       ## inefficient gRNA (GCC and TT) count ratios.
-      dplyr::left_join(fgcQC::calc_inefficient_gRNA_count_ratios(counts_norm, library), by = "SampleName")
+      dplyr::left_join(fgcQC::calc_inefficient_gRNA_count_ratios(counts_norm, library), by = "SampleName") %>%
+      ### QC for logFC data.
+      ## distance correlation between gRNA logFC and GC content.
+      tibble::add_column(fgcQC::calc_dcorr_GC_content_logfc(lfc.ctrl_pl, library, "ctrl_plasmid"),
+                         .before = "SampleId") %>%
+      ## inefficient gRNA (GCC and TT) logFC ratios.
+      tibble::add_column(fgcQC::calc_inefficient_gRNA_logfc(lfc.ctrl_pl, library, "ctrl_plasmid"),
+                         .before = "SampleId")
 
 
   }else{
