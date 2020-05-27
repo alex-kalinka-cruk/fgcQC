@@ -43,7 +43,7 @@ calc_median_normalization_size_factors <- function(counts){
 normalize_library_depth_median_ratio <- function(counts){
   tryCatch({
     size_factors <- counts %>%
-      calc_median_normalization_size_factors()
+      fgcQC::calc_median_normalization_size_factors()
     counts[,3:ncol(counts)] <- as.data.frame(t(apply(counts[,3:ncol(counts)],
                                                      1, function(x) x/c(unlist(size_factors)))))
   },
