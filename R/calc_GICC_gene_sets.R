@@ -57,7 +57,7 @@ calc_GICC_gene_sets <- function(counts, gene_sets, plasmid_sample_id, control_sa
         ret <- cbind(ret, gicc_tvp, gicc_tvc)
       }
     },
-    error = function(e) stop(paste("GICC: unable to process gene sets:",e))
+    error = function(e) stop(paste("calc_GICC_gene_sets: unable to process gene sets:",e))
     )
   }
   return(ret %>% dplyr::select(-dummy))

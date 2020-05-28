@@ -8,13 +8,12 @@ QC_fgc_crispr_data(
   analysis_config,
   combined_counts,
   bagel_ctrl_plasmid,
+  bagel_treat_plasmid,
   bcl2fastq,
   library,
   comparison_name,
   output,
-  norm_method = "median_ratio",
-  html_report = FALSE,
-  historical_data = NULL
+  norm_method = "median_ratio"
 )
 }
 \arguments{
@@ -23,6 +22,8 @@ QC_fgc_crispr_data(
 \item{combined_counts}{A path to a valid combined counts csv file (produced by the AZ-CRUK CRISPR analysis pipeline).}
 
 \item{bagel_ctrl_plasmid}{A path to a valid Bagel tsv results file for Control vs Plasmid.}
+
+\item{bagel_treat_plasmid}{A path to a valid Bagel tsv results file for Treatment vs Plasmid. If `NULL`, no such file is available.}
 
 \item{bcl2fastq}{A character string giving one or more paths to valid `bcl2fastq2` summary output JSON files (paths separated by commas).}
 
@@ -33,10 +34,6 @@ QC_fgc_crispr_data(
 \item{output}{A character string giving an output file name for the csv results. If `NULL`, do not write out any results.}
 
 \item{norm_method}{A character string naming a normalization method for the count data. Can be `median_ratio` or `relative`. Defaults to `median_ratio`.}
-
-\item{html_report}{A logical indicating whether an HTML report for the focal comparison should be produced. Defaults to `FALSE`.}
-
-\item{historical_data}{If `html_report` is `TRUE` then a data frame of historical QC data to be used in the report. Set to `NULL` if `html_report` is `FALSE`. Defaults to `NULL`.}
 }
 \value{
 A list containing the following elements:

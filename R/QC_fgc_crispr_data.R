@@ -6,11 +6,13 @@
 
 
 .check_qc_inputs <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison, output, norm_method,
-                             html_report, historical_data){
+                             bagel_treat_plasmid){
   .file_exists(analysis_config)
   .file_exists(combined_counts)
   .file_exists(bagel_ctrl_plasmid)
   .file_exists(library)
+  if(!is.null(bagel_treat_plasmid))
+    .file_exists(bagel_treat_plasmid)
   if(!is.character(bcl2fastq))
     stop("'bcl2fastq' must be a character string pointing to one or more bcl2fastq2 output JSON files separated by commas")
   b2f <- unlist(strsplit(bcl2fastq,","))
@@ -21,12 +23,6 @@
     stop("'output' must be a character string naming an output file for QC results or NULL")
   if(!norm_method %in% c("median_ratio","relative"))
     stop("'norm_method' should be one of 'median_ratio' or 'relative'")
-  if(!is.logical(html_report))
-    stop(paste("'html_report' should be TRUE or FALSE, not:",html_report))
-  if(html_report){
-    if(!inherits(historical_data,"data.frame"))
-      stop(paste("if an html report is to be produced, 'historical_data' should be a data frame of historical QC data, not an object of class:",class(historical_data)))
-  }
 }
 
 
@@ -64,13 +60,12 @@
 #' @param analysis_config A path to a valid analysis config JSON file to be used as input for the AZ-CRUK CRISPR analysis pipeline.
 #' @param combined_counts A path to a valid combined counts csv file (produced by the AZ-CRUK CRISPR analysis pipeline).
 #' @param bagel_ctrl_plasmid A path to a valid Bagel tsv results file for Control vs Plasmid.
+#' @param bagel_treat_plasmid A path to a valid Bagel tsv results file for Treatment vs Plasmid. If `NULL`, no such file is available.
 #' @param bcl2fastq A character string giving one or more paths to valid `bcl2fastq2` summary output JSON files (paths separated by commas).
 #' @param library A valid path to a library tsv file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID (produced by the AZ-CRUK CRISPR reference data generation pipeline).
 #' @param comparison_name A character string naming a single comparison to extract QC data for (should correspond to the comparison name used in the analysis config JSON file).
 #' @param output A character string giving an output file name for the csv results. If `NULL`, do not write out any results.
 #' @param norm_method A character string naming a normalization method for the count data. Can be `median_ratio` or `relative`. Defaults to `median_ratio`.
-#' @param html_report A logical indicating whether an HTML report for the focal comparison should be produced. Defaults to `FALSE`.
-#' @param historical_data If `html_report` is `TRUE` then a data frame of historical QC data to be used in the report. Set to `NULL` if `html_report` is `FALSE`. Defaults to `NULL`.
 #'
 #' @return A list containing the following elements:
 #' `qc_metrics` - A data frame containing QC metrics as columns and samples as rows; this data will also be written to the `output` file, if not `NULL`.
@@ -81,13 +76,13 @@
 #' @importFrom tibble add_column
 #' @importFrom magrittr %<>%
 #' @export
-QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library,
-                               comparison_name, output, norm_method = "median_ratio",
-                               html_report = FALSE, historical_data = NULL){
+QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bagel_treat_plasmid,
+                               bcl2fastq, library, comparison_name, output,
+                               norm_method = "median_ratio"){
   ### Prep.
   ## File path checks.
   .check_qc_inputs(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison_name, output, norm_method,
-                   html_report, historical_data)
+                   bagel_treat_plasmid)
 
   ## Analysis config.
   json_list <- fgcQC::read_analysis_config_json(analysis_config)
@@ -167,6 +162,9 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       # 2. Treatment vs Plasmid.
       lfc.treat_pl <- fgcQC::calc_log2_fold_change_gRNAs(counts_norm, ref = plasmid_samp, comp = treat_samp)
       lfc.treat_pl.genes <- fgcQC::calc_log2_fold_change_genes(lfc.treat_pl)
+    }else{
+      treat_samp <- NULL
+      lfc.treat_pl <- NULL
     }
 
     qc_metrics %<>%
@@ -183,8 +181,13 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       ## inefficient gRNA (GCC and TT) count ratios.
       dplyr::left_join(fgcQC::calc_inefficient_gRNA_count_ratios(counts_norm, library), by = "SampleName") %>%
       ## GICC.
-      dplyr::left_join(fgcQC::calc_GICC_gene_sets(counts_norm, )) %>%
+      tibble::add_column(fgcQC::calc_GICC_gene_sets(counts_norm, fgcQC::crispr_gene_sets$essential,
+                                                  plasmid_samp, control_samp, treat_samp),
+                         .before = "SampleId") %>%
       ### QC for logFC data.
+      ## NNMD.
+      tibble::add_column(fgcQC::calc_NNMD_gene_sets(lfc.ctrl_pl, lfc.treat_pl, fgcQC::crispr_gene_sets$essential),
+                         .before = "SampleId") %>%
       ## distance correlation between gRNA logFC and GC content.
       tibble::add_column(fgcQC::calc_dcorr_GC_content_logfc(lfc.ctrl_pl, library, "ctrl_plasmid"),
                          .before = "SampleId") %>%
@@ -209,6 +212,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
         tibble::add_column(data.frame(log2FC_GCC_diff.treat_plasmid = NA, log2FC_TT_diff.treat_plasmid = NA),
                            .before = "SampleId")
     }
+
 
 
   }else{
