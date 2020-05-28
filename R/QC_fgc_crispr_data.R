@@ -84,6 +84,7 @@
 QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library,
                                comparison_name, output, norm_method = "median_ratio",
                                html_report = FALSE, historical_data = NULL){
+  ### Prep.
   ## File path checks.
   .check_qc_inputs(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison_name, output, norm_method,
                    html_report, historical_data)
@@ -101,6 +102,14 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
   qc_config <- json_list$qc %>%
     dplyr::select(-indexes, -label) %>%
     dplyr::filter(name %in% comparisons$sample)
+
+  # Read in counts.
+  tryCatch(counts <- read.delim(combined_counts, sep="\t", header=T, stringsAsFactors = F),
+           error = function(e) stop(paste("QC_fgc_crispr_data: unable to read combined counts file",combined_counts,":",e)))
+  # Read in library file.
+  tryCatch(library <- read.delim(library, skip = 1, header=F, stringsAsFactors = F),
+           error = function(e) stop(paste("QC_fgc_crispr_data: unable to read library file",library,":",e)))
+
 
   ### QC for sequencing metrics (bcl2fastq2 output).
   tryCatch({
@@ -138,17 +147,12 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
 
   # Output determined by screen type.
   if(comparisons$type[1] == "n"){
-    ## Read and normalize counts.
-    tryCatch(counts <- read.delim(combined_counts, sep="\t", header=T, stringsAsFactors = F),
-             error = function(e) stop(paste("unable to read combined counts file",combined_counts,":",e)))
+    ## Normalize counts.
     if(norm_method == "median_ratio"){
       counts_norm <- fgcQC::normalize_library_depth_median_ratio(counts)
     }else{
       counts_norm <- fgcQC::normalize_library_depth_relative(counts, 2e7)
     }
-
-    # Read in library file.
-    library <- read.delim(library, skip = 1, header=F, stringsAsFactors = F)
 
     ## Log2 fold change at gRNA and gene levels.
     control_samp <- comparisons$sample[comparisons$class == "control"]
@@ -178,6 +182,8 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       dplyr::left_join(fgcQC::calc_dcorr_GC_content_counts(counts_norm, library), by = "SampleName") %>%
       ## inefficient gRNA (GCC and TT) count ratios.
       dplyr::left_join(fgcQC::calc_inefficient_gRNA_count_ratios(counts_norm, library), by = "SampleName") %>%
+      ## GICC.
+      dplyr::left_join(fgcQC::calc_GICC_gene_sets(counts_norm, )) %>%
       ### QC for logFC data.
       ## distance correlation between gRNA logFC and GC content.
       tibble::add_column(fgcQC::calc_dcorr_GC_content_logfc(lfc.ctrl_pl, library, "ctrl_plasmid"),
@@ -185,6 +191,24 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       ## inefficient gRNA (GCC and TT) logFC ratios.
       tibble::add_column(fgcQC::calc_inefficient_gRNA_logfc(lfc.ctrl_pl, library, "ctrl_plasmid"),
                          .before = "SampleId")
+
+    if(comparisons$goal[1] != "lethality"){
+      qc_metrics %<>%
+        ## distance correlation between gRNA logFC and GC content.
+        tibble::add_column(fgcQC::calc_dcorr_GC_content_logfc(lfc.treat_pl, library, "treat_plasmid"),
+                           .before = "SampleId") %>%
+        ## inefficient gRNA (GCC and TT) logFC ratios.
+        tibble::add_column(fgcQC::calc_inefficient_gRNA_logfc(lfc.treat_pl, library, "treat_plasmid"),
+                           .before = "SampleId")
+    }else{
+      qc_metrics %<>%
+        ## distance correlation between gRNA logFC and GC content.
+        tibble::add_column(data.frame(distcorr_GC_content_logfc.treat_plasmid = NA),
+                           .before = "SampleId") %>%
+        ## inefficient gRNA (GCC and TT) logFC ratios.
+        tibble::add_column(data.frame(log2FC_GCC_diff.treat_plasmid = NA, log2FC_TT_diff.treat_plasmid = NA),
+                           .before = "SampleId")
+    }
 
 
   }else{
