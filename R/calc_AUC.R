@@ -38,7 +38,7 @@ calc_AUC <- function(data, score_col, group = NULL){
     data %<>%
         dplyr::summarise(AUC = .get_auc(!!sc, TP))
   },
-  error = function(e) stop(paste("unable to calculate AUROC:",e))
+  error = function(e) stop(paste("calc_AUC: unable to calculate AUROC:",e))
   )
   return(data)
 }

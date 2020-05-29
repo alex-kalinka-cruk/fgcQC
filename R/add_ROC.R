@@ -22,7 +22,7 @@ add_ROC <- function(data, score_col){
       dplyr::mutate(True_Positive_Rate = cumsum(TP)/sum(TP),
                     False_Positive_Rate = cumsum(!TP)/sum(!TP))
   },
-  error = function(e) stop(paste("unable to calculate ROC:",e))
+  error = function(e) stop(paste("add_ROC: unable to calculate ROC:",e))
   )
   return(data)
 }

@@ -98,12 +98,23 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
     dplyr::select(-indexes, -label) %>%
     dplyr::filter(name %in% comparisons$sample)
 
-  # Read in counts.
+  ## Read data.
+  # counts.
   tryCatch(counts <- read.delim(combined_counts, sep="\t", header=T, stringsAsFactors = F),
            error = function(e) stop(paste("QC_fgc_crispr_data: unable to read combined counts file",combined_counts,":",e)))
-  # Read in library file.
+  # library file.
   tryCatch(library <- read.delim(library, skip = 1, header=F, stringsAsFactors = F),
            error = function(e) stop(paste("QC_fgc_crispr_data: unable to read library file",library,":",e)))
+  # Bagel results.
+  tryCatch(bagel_ctrl_plasmid <- read.delim(bagel_ctrl_plasmid, sep="\t", header=T, stringsAsFactors = F),
+           error = function(e) stop(paste("QC_fgc_crispr_data: unable to read bagel ctrl-vs-plasmid file",bagel_ctrl_plasmid,":",e)))
+  if(!is.null(bagel_treat_plasmid)){
+    tryCatch(bagel_treat_plasmid <- read.delim(bagel_treat_plasmid, sep="\t", header=T, stringsAsFactors = F),
+             error = function(e) stop(paste("QC_fgc_crispr_data: unable to read bagel treatment-vs-plasmid file",
+                                            bagel_treat_plasmid,":",e)))
+  }else{
+    bagel_treat_plasmid <- NULL
+  }
 
 
   ### QC for sequencing metrics (bcl2fastq2 output).
@@ -188,6 +199,9 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       ## NNMD.
       tibble::add_column(fgcQC::calc_NNMD_gene_sets(lfc.ctrl_pl, lfc.treat_pl, fgcQC::crispr_gene_sets$essential),
                          .before = "SampleId") %>%
+      ## NNMD_robust.
+      tibble::add_column(fgcQC::calc_NNMD_robust_gene_sets(lfc.ctrl_pl, lfc.treat_pl, fgcQC::crispr_gene_sets$essential),
+                         .before = "SampleId") %>%
       ## distance correlation between gRNA logFC and GC content.
       tibble::add_column(fgcQC::calc_dcorr_GC_content_logfc(lfc.ctrl_pl, library, "ctrl_plasmid"),
                          .before = "SampleId") %>%
@@ -212,6 +226,12 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
         tibble::add_column(data.frame(log2FC_GCC_diff.treat_plasmid = NA, log2FC_TT_diff.treat_plasmid = NA),
                            .before = "SampleId")
     }
+
+    bagel_roc <- fgcQC::add_bagel_ROC_gene_sets(bagel_ctrl_plasmid, bagel_treat_plasmid,
+                                                fgcQC::crispr_gene_sets$essential)
+
+    qc_metrics %<>%
+      ### QC for Bagel binary classification data.
 
 
 

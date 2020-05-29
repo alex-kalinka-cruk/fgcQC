@@ -1,4 +1,4 @@
-#' calc_NNMD_robust
+#' NNMD_robust
 #'
 #' Calculates a robust equivalent of the Null-Normalized Mean Difference (NNMD; also known as Glass's delta) for the log fold change distributions of essential and non-essential genes - defined as the median difference divided by the median absolute deviation (MAD) of non-essential genes (the reference set).
 #'
@@ -12,7 +12,7 @@
 #' @importFrom dplyr filter select mutate summarise
 #' @importFrom magrittr %<>%
 #' @export
-calc_NNMD_robust <- function(data, gene_col, lfc_col, essential_genes, nonessential_genes){
+NNMD_robust <- function(data, gene_col, lfc_col, essential_genes, nonessential_genes){
   if(!gene_col %in% colnames(data))
     stop(paste("expecting to find a",gene_col,"column in 'data'"))
   if(!lfc_col %in% colnames(data))
