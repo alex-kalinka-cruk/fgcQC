@@ -7,7 +7,7 @@
 add_ROC(data, score_col)
 }
 \arguments{
-\item{data}{A data frame containing a TP and score column.}
+\item{data}{A data frame containing a `TP` and score column.}
 
 \item{score_col}{A character string naming the column to be used as a score column.}
 }

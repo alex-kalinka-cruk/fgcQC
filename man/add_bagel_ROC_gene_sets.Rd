@@ -15,10 +15,10 @@ add_bagel_ROC_gene_sets(bagel_ctrl_pl, bagel_treat_pl, gene_sets)
 }
 \value{
 A list with the following elements:
-`bagel_ctrl_pl` - The original data frame with columns `True_Positive_Rate.<gene_set>` and `False_Positive_Rate.<gene_set>` where '<gene_set>' is the name of a gene set.
-`bagel_treat_pl` - The original data frame with columns `True_Positive_Rate.<gene_set>` and `False_Positive_Rate.<gene_set>` where '<gene_set>' is the name of a gene set. `NULL` if not given.
+`bagel_ctrl_plasmid` - The original data frame with columns `gene_set`, `True_Positive_Rate.<gene_set>`, `False_Positive_Rate.<gene_set>` where '<gene_set>' is the name of a gene set.
+`bagel_treat_plasmid` - The original data frame with columns `gene_set`, `True_Positive_Rate.<gene_set>` and `False_Positive_Rate.<gene_set>` where '<gene_set>' is the name of a gene set. `NULL` if not given.
 `AUROC` - A data frame containing columns `AUROC.<comp>.<gene_set>` where '<comp>' is either 'ctrl_plasmid' or 'treat_plasmid' and <gene_set>' is the name of a gene set.
 }
 \description{
-Adds True Positive and False Positive columns to Bagel output for a list of gene sets and calculates AUROC for each gene set.
+Adds True Positive and False Positive columns to Bagel output for a list of gene sets and calculates AUROC for each gene set: all relative to the Hart non-essential genes.
 }

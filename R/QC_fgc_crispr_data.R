@@ -232,7 +232,8 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
 
     qc_metrics %<>%
       ### QC for Bagel binary classification data.
-
+      ## AUROC.
+      tibble::add_column(bagel_roc$AUROC, .before = "SampleId")
 
 
   }else{
