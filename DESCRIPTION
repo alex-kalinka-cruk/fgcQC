@@ -20,4 +20,5 @@ Imports:
     jsonlite,
     ineq,
     rlang,
-    energy
+    energy,
+    PRROC

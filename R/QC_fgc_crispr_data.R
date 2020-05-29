@@ -72,6 +72,7 @@
 #' `comparisons` - A data frame of samples belonging to the focal comparison.
 #' `seq_metrics` - A data frame of CI sequencing metrics at both flowcell and sample levels.
 #' `log2FC` - A list containing normalized counts and logFC data frames at both the gRNA and gene level.
+#' `bagel_ROC` - A list containing Bagel Bayes Factor data with `True_Positive_Rate` and `False_Positive_Rate` columns for specific `gene_sets`.
 #' @importFrom dplyr mutate select filter right_join left_join everything
 #' @importFrom tibble add_column
 #' @importFrom magrittr %<>%
@@ -227,13 +228,17 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
                            .before = "SampleId")
     }
 
+    ### QC for Bagel binary classification data.
     bagel_roc <- fgcQC::add_bagel_ROC_gene_sets(bagel_ctrl_plasmid, bagel_treat_plasmid,
+                                                fgcQC::crispr_gene_sets$essential)
+    bagel_prroc <- fgcQC::add_bagel_PRROC_gene_sets(bagel_ctrl_plasmid, bagel_treat_plasmid,
                                                 fgcQC::crispr_gene_sets$essential)
 
     qc_metrics %<>%
-      ### QC for Bagel binary classification data.
       ## AUROC.
-      tibble::add_column(bagel_roc$AUROC, .before = "SampleId")
+      tibble::add_column(bagel_roc$AUROC, .before = "SampleId") %>%
+      ## AUPrRc.
+      tibble::add_column(bagel_prroc$AUPrRc, .before = "SampleId")
 
 
   }else{
@@ -257,12 +262,20 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
     ret$log2FC <- list()
     ret$log2FC$control_vs_plasmid.gRNA <- lfc.ctrl_pl
     ret$log2FC$control_vs_plasmid.gene <- lfc.ctrl_pl.genes
+    ret$bagel_ROC <- list()
+    ret$bagel_ROC$bagel_ctrl_plasmid <- bagel_roc$bagel_ctrl_plasmid
+    ret$bagel_PrRc <- list()
+    ret$bagel_PrRc$bagel_ctrl_plasmid <- bagel_prroc$bagel_ctrl_plasmid
     if(comparisons$goal[1] != "lethality"){
       ret$log2FC$treatment_vs_plasmid.gRNA <- lfc.treat_pl
       ret$log2FC$treatment_vs_plasmid.gene <- lfc.treat_pl.genes
+      ret$bagel_ROC$bagel_treat_plasmid <- bagel_roc$bagel_treat_plasmid
+      ret$bagel_PrRc$bagel_treat_plasmid <- bagel_prroc$bagel_treat_plasmid
     }
   }else{
     ret$log2FC <- NA
+    ret$bagel_ROC <- NA
+    ret$bagel_PrRc <- NA
   }
   class(ret) <- "fgcQC"
   return(ret)

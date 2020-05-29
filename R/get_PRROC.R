@@ -35,7 +35,7 @@ get_PRROC <- function(data, score_col, group_col = NULL){
     if(!is.null(group_col))
       prc %<>% dplyr::mutate(!!dplyr::sym(group_col) := unlist((data %>% dplyr::select(!!dplyr::sym(group_col)))[,1])[1])
     },
-    error = function(e) stop(paste("unable to calculate precision-recall curve:",e))
+    error = function(e) stop(paste("get_PRROC: unable to calculate precision-recall curve:",e))
     )
     return(prc)
 }
