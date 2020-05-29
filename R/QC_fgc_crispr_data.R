@@ -73,7 +73,7 @@
 #' `seq_metrics` - A data frame of CI sequencing metrics at both flowcell and sample levels.
 #' `log2FC` - A list containing normalized counts and logFC data frames at both the gRNA and gene level.
 #' `bagel_ROC` - A list containing Bagel Bayes Factor data with `True_Positive_Rate` and `False_Positive_Rate` columns for specific `gene_sets`.
-#' @importFrom dplyr mutate select filter right_join left_join everything
+#' @importFrom dplyr mutate select filter right_join left_join everything inner_join
 #' @importFrom tibble add_column
 #' @importFrom magrittr %<>%
 #' @export
@@ -179,6 +179,27 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       lfc.treat_pl <- NULL
     }
 
+    # logfc for replicate logfc correlations.
+    if(length(control_samp) > 1){
+      lfc.ctrl_pl.repl <- fgcQC::calc_log2_fold_change_gRNAs(counts_norm, ref = plasmid_samp, comp = control_samp[1]) %>%
+        dplyr::inner_join(fgcQC::calc_log2_fold_change_gRNAs(counts_norm, ref = plasmid_samp, comp = control_samp[2]),
+                          by = "sgRNA", suffix = c(".repl_1",".repl_2"))
+    }else{
+      lfc.ctrl_pl.repl <- NULL
+    }
+
+    if(!is.null(treat_samp)){
+      if(length(treat_samp) > 1){
+        lfc.treat_pl.repl <- fgcQC::calc_log2_fold_change_gRNAs(counts_norm, ref = plasmid_samp, comp = treat_samp[1]) %>%
+          dplyr::inner_join(fgcQC::calc_log2_fold_change_gRNAs(counts_norm, ref = plasmid_samp, comp = treat_samp[2]),
+                            by = "sgRNA", suffix = c(".repl_1",".repl_2"))
+      }else{
+        lfc.treat_pl.repl <- NULL
+      }
+    }else{
+      lfc.treat_pl.repl <- NULL
+    }
+
     qc_metrics %<>%
       ### QC for count data.
       ## Zero and low count plasmid gRNAs.
@@ -196,6 +217,9 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       tibble::add_column(fgcQC::calc_GICC_gene_sets(counts_norm, fgcQC::crispr_gene_sets$essential,
                                                   plasmid_samp, control_samp, treat_samp),
                          .before = "SampleId") %>%
+      ## dispersion shrinkage estimator for Treat-Ctrl.
+      tibble::add_column(fgcQC::calc_dispersion_adj_gRNA(counts, control_samp, treat_samp),
+                         .before = "SampleId") %>%
       ### QC for logFC data.
       ## NNMD.
       tibble::add_column(fgcQC::calc_NNMD_gene_sets(lfc.ctrl_pl, lfc.treat_pl, fgcQC::crispr_gene_sets$essential),
@@ -208,6 +232,11 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
                          .before = "SampleId") %>%
       ## inefficient gRNA (GCC and TT) logFC ratios.
       tibble::add_column(fgcQC::calc_inefficient_gRNA_logfc(lfc.ctrl_pl, library, "ctrl_plasmid"),
+                         .before = "SampleId") %>%
+      ## replicate logFC correlations.
+      tibble::add_column(fgcQC::calc_replicate_logfc_corr(lfc.ctrl_pl.repl, "ctrl_plasmid"),
+                         .before = "SampleId") %>%
+      tibble::add_column(fgcQC::calc_replicate_logfc_corr(lfc.treat_pl.repl, "treat_plasmid"),
                          .before = "SampleId")
 
     if(comparisons$goal[1] != "lethality"){
