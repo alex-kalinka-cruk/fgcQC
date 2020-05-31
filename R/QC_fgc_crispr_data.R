@@ -257,6 +257,13 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
                            .before = "SampleId")
     }
 
+    # Add NNMD for Control gRNAs (non-targeting guides), if they exist.
+    if(any(grepl("Control",library$sgRNA))){
+
+    }else{
+
+    }
+
     ### QC for Bagel binary classification data.
     bagel_roc <- fgcQC::add_bagel_ROC_gene_sets(bagel_ctrl_plasmid, bagel_treat_plasmid,
                                                 fgcQC::crispr_gene_sets$essential)
