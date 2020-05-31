@@ -5,6 +5,7 @@
 #' @param library A data frame containing the library file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID.
 #'
 #' @return A data frame with a column named `GC_percent`.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr mutate rowwise ungroup
 #' @importFrom magrittr %<>%
 calc_GC_percent_library <- function(library){

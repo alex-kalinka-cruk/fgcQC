@@ -13,6 +13,7 @@
 #' @param path A valid path to a 'Stats.json' file produced by `bcl2fastq2`.
 #'
 #' @return A data frame containing flowcell and sample-level sequencing metrics.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #'
 #' @importFrom jsonlite fromJSON
 #' @importFrom dplyr as_tibble select mutate inner_join right_join rename

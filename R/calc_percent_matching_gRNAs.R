@@ -6,6 +6,7 @@
 #' @param counts A data frame of counts for each sample in the study (samples as columns, gRNAs as rows).
 #'
 #' @return A data frame containing per-sample percent matching gRNA values in a column called `percent_reads_matching_gRNAs`.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #'
 #' @importFrom dplyr mutate
 #' @export
@@ -15,7 +16,7 @@ calc_percent_matching_gRNAs <- function(b2f_samples, counts){
     pm <- b2f_samples %>%
       dplyr::mutate(percent_reads_matching_gRNAs = 100*totals[match(SampleName, names(totals))]/NumberReads)
   },
-  error = function(e) paste(stop("unable to calculate reads matching gRNA percent:",e))
+  error = function(e) paste(stop("calc_percent_matching_gRNAs: unable to calculate reads matching gRNA percent:",e))
   )
   return(pm)
 }

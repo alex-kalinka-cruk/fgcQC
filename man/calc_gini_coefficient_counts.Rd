@@ -15,3 +15,6 @@ A data frame containing a `SampleName` column, and a column named `gini_coeffici
 \description{
 Calculates the Gini coefficient of dispersion for sample gRNA count distributions.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

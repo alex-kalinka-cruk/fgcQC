@@ -19,3 +19,6 @@ Calculates adjusted dispersion estimates at the gRNA level using a shrinkage est
 \references{
 Wu, H. et al. 2013. A new shrinkage estimator for dispersion improves differential expression detection in RNA-seq data. Biostatistics 14: 232-243.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

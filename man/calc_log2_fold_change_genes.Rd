@@ -15,3 +15,6 @@ A data frame with a column named `log2FC_gene`.
 \description{
 Calculates median log2 fold changes for genes (taking as input output from `calc_log2_fold_change_gRNAs`).
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

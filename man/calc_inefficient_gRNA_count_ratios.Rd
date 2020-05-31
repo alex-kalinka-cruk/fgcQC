@@ -20,3 +20,6 @@ Calculates the ratio of normalized counts for inefficient sgRNA PAM-proximal seq
 \references{
 Graf, R. et al. (2019) sgRNA sequence motifs blocking efficient CRISPR/Cas9-mediated gene editing. Cell Rep 26: 1098-1103.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

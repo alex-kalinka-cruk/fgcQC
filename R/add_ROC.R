@@ -6,6 +6,7 @@
 #' @param score_col A character string naming the column to be used as a score column.
 #'
 #' @return A data frame containing the following columns: `True_Positive_Rate` and `False_Positive_Rate`.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr arrange desc mutate filter sym
 #' @importFrom magrittr %<>%
 #' @export

@@ -22,3 +22,6 @@ A list with the following elements:
 \description{
 Adds True Positive and False Positive columns to Bagel output for a list of gene sets and calculates AUROC for each gene set: all relative to the Hart non-essential genes.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

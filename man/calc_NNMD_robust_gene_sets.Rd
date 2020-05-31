@@ -19,3 +19,6 @@ A data frame with columns named `NNMD_robust.<comp>.<gene_set>` where '<comp' is
 \description{
 Calculates a Robust equivalent of the Null-Normalized Mean Difference (NNMD) for sets of genes (based on median difference divided by median absolute deviation of reference set).
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

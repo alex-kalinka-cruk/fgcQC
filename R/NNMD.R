@@ -9,6 +9,7 @@
 #' @param nonessential_genes A vector of non-essential gene names.
 #'
 #' @return A single numeric value.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr filter select mutate summarise sym
 #' @importFrom magrittr %<>%
 #' @export

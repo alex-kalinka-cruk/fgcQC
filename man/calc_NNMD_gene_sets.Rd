@@ -19,3 +19,6 @@ A data frame with columns named `NNMD.<comp>.<gene_set>` where '<comp' is one of
 \description{
 Calculates Null-Normalized Mean Difference (NNMD) for sets of genes.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

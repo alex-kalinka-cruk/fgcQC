@@ -23,3 +23,6 @@ A single numeric value.
 \description{
 Calculates Null-Normalized Mean Difference (NNMD; also known as Glass's delta) for the log fold change distributions of essential and non-essential genes - defined as the mean difference divided by the standard deviation of non-essential genes (the reference set).
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

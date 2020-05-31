@@ -15,3 +15,6 @@ A data frame with 1 row and as many columns as `counts` with size factors for ea
 \description{
 Calculates the size factors used in median normalization for count data: median of the geometric mean of counts across all experiments.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

@@ -5,6 +5,7 @@
 #' @param counts A data frame of counts for each sample in the study (samples as columns, gRNAs as rows).
 #'
 #' @return A data frame containing a `SampleName` column, and a column named `gini_coefficient_counts`.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr mutate
 #' @importFrom ineq ineq
 #' @export

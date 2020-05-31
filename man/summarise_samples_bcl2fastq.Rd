@@ -15,3 +15,6 @@ A summarised data frame with one row per sample.
 \description{
 Summarises sequencing metrics for samples sequenced across multiple lanes and/or flowcells. Minimum values are taken for numeric metrics and count metrics are summed.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

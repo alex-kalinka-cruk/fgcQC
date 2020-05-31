@@ -7,6 +7,7 @@
 #' @param treat_sample_id A character vector naming one or more treatment samples. If `NULL` then there are no treatment samples.
 #'
 #' @importFrom DSS newSeqCountSet estNormFactors estDispersion
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @references Wu, H. et al. 2013. A new shrinkage estimator for dispersion improves differential expression detection in RNA-seq data. Biostatistics 14: 232-243.
 #' @export
 calc_dispersion_adj_gRNA <- function(counts, control_sample_id, treat_sample_id){

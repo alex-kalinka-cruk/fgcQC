@@ -6,6 +6,7 @@
 #' @param library A data frame containing the library file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID.
 #'
 #' @return A data frame with a `SampleName` column and a `distcorr_GC_content_counts` column.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr %>% mutate rowwise ungroup filter arrange
 #' @importFrom energy dcor2d
 #' @importFrom magrittr %<>%

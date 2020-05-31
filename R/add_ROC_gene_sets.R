@@ -10,6 +10,7 @@
 #' `bagel_ctrl_plasmid` - The original data frame with columns `gene_set`, `True_Positive_Rate.<gene_set>`, `False_Positive_Rate.<gene_set>` where '<gene_set>' is the name of a gene set.
 #' `bagel_treat_plasmid` - The original data frame with columns `gene_set`, `True_Positive_Rate.<gene_set>` and `False_Positive_Rate.<gene_set>` where '<gene_set>' is the name of a gene set. `NULL` if not given.
 #' `AUROC` - A data frame containing columns `AUROC.<comp>.<gene_set>` where '<comp>' is either 'ctrl_plasmid' or 'treat_plasmid' and <gene_set>' is the name of a gene set.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr mutate sym rename select filter
 #' @importFrom magrittr %<>%
 #' @importFrom tibble tibble

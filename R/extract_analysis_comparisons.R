@@ -26,6 +26,7 @@
 #' @param json_list A list returned by `fgcQC::read_analysis_config_json`.
 #'
 #' @return A data frame containing sample comparisons.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr rowwise ungroup do
 #' @export
 extract_analysis_comparisons <- function(json_list){

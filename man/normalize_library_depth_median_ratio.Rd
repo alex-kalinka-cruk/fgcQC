@@ -19,3 +19,6 @@ Normalizes library depth from a counts file using the median-ratio method [1].
 Wang T, Wei JJ, Sabatini DM, Lander ES. Genetic screens in human cells using the CRISPR-Cas9 system. Science. 2014, 343: 80-84.
 Anders S, Huber W. Differential expression analysis for sequence count data. Genome Biol. 2010, 11: R106
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

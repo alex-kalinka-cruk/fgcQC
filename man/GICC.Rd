@@ -31,3 +31,6 @@ Calculates Ahrens (1976) multivariate generalized intraclass correlation coeffic
 \references{
 Ahrens, H. (1976). Multivariate variance-covariance components (MVCC) and generalized intraclass correlation coefficient (GICC). Biom. Z. 18, 527-533.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

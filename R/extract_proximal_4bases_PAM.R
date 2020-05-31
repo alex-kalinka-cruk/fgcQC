@@ -5,6 +5,7 @@
 #' @param library A data frame containing the library file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID.
 #'
 #' @return A data frame with a column named `proximal_4bases_pam`.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr mutate rowwise ungroup
 #' @importFrom magrittr %<>%
 #' @references Graf, R. et al. (2019) sgRNA sequence motifs blocking efficient CRISPR/Cas9-mediated gene editing. Cell Rep 26: 1098-1103.

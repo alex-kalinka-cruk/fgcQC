@@ -17,3 +17,6 @@ A data frame containing per-sample percent matching gRNA values in a column call
 \description{
 Calculates the percentage of reads in each sample that can be assigned to any of the gRNA sequences.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

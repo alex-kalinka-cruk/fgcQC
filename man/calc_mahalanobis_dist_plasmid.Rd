@@ -26,3 +26,6 @@ A data frame with the following column(s): `mahalanobis_dist_ratio.<comp>` where
 \description{
 Calculates the Mahalanobis distance ratio for control vs plasmid and treatment vs plasmid.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

@@ -17,3 +17,6 @@ A data frame containing the following columns: `True_Positive_Rate` and `False_P
 \description{
 Adds TPR and FPR columns to a data frame containing TP and a score metric (e.g. Bayes factors).
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

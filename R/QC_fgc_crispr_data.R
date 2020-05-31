@@ -5,8 +5,8 @@
 }
 
 
-.check_qc_inputs <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison, output, norm_method,
-                             bagel_treat_plasmid){
+.check_qc_inputs <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison,
+                             output, output_R_object, norm_method, bagel_treat_plasmid){
   .file_exists(analysis_config)
   .file_exists(combined_counts)
   .file_exists(bagel_ctrl_plasmid)
@@ -21,6 +21,8 @@
     stop("'comparison_name' must be a character string naming a comparison in the analysis config JSON file")
   if(!is.character(output) & !is.null(output))
     stop("'output' must be a character string naming an output file for QC results or NULL")
+  if(!is.character(output_R_object) & !is.null(output_R_object))
+    stop("'output_R_object' must be a character string naming an output file for the QC R object or NULL")
   if(!norm_method %in% c("median_ratio","relative"))
     stop("'norm_method' should be one of 'median_ratio' or 'relative'")
 }
@@ -65,6 +67,7 @@
 #' @param library A valid path to a library tsv file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID (produced by the AZ-CRUK CRISPR reference data generation pipeline).
 #' @param comparison_name A character string naming a single comparison to extract QC data for (should correspond to the comparison name used in the analysis config JSON file).
 #' @param output A character string giving an output file name for the csv results. If `NULL`, do not write out any results.
+#' @param output_R_object A character string giving an output file name for the returned R object (useful for trouble-shooting). If `NULL`, do not save the R object.
 #' @param norm_method A character string naming a normalization method for the count data. Can be `median_ratio` or `relative`. Defaults to `median_ratio`.
 #'
 #' @return A list containing the following elements:
@@ -73,17 +76,19 @@
 #' `seq_metrics` - A data frame of CI sequencing metrics at both flowcell and sample levels.
 #' `log2FC` - A list containing normalized counts and logFC data frames at both the gRNA and gene level.
 #' `bagel_ROC` - A list containing Bagel Bayes Factor data with `True_Positive_Rate` and `False_Positive_Rate` columns for specific `gene_sets`.
+#' `bagel_PrRc` - A list containing Precision-Recall data for different sample comparisons.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr mutate select filter right_join left_join everything inner_join
 #' @importFrom tibble add_column
 #' @importFrom magrittr %<>%
 #' @export
 QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bagel_treat_plasmid,
-                               bcl2fastq, library, comparison_name, output,
+                               bcl2fastq, library, comparison_name, output, output_R_object,
                                norm_method = "median_ratio"){
   ### Prep.
   ## File path checks.
-  .check_qc_inputs(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison_name, output, norm_method,
-                   bagel_treat_plasmid)
+  .check_qc_inputs(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison_name,
+                   output, output_R_object, norm_method, bagel_treat_plasmid)
 
   ## Analysis config.
   json_list <- fgcQC::read_analysis_config_json(analysis_config)
@@ -130,7 +135,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       dplyr::filter(SampleName %in% comparisons$sample)
 
     if(any(!b2f$SampleName %in% qc_config$name))
-      stop(paste("analysis config QC data missing for:",b2f$SampleName[!b2f$SampleName %in% qc_config$name]))
+      stop(paste("QC_fgc_crispr_data: analysis config QC data missing for:",b2f$SampleName[!b2f$SampleName %in% qc_config$name]))
 
     qc_metrics <- b2f %>%
       # Fold in QC data from analysis config.
@@ -143,13 +148,13 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
                     SampleId,SampleName,SampleLabel,SampleClass,
                     dplyr::everything())
   },
-  error = function(e) stop(paste("unable to build bcl2fastq data frame:",e))
+  error = function(e) stop(paste("QC_fgc_crispr_data: unable to build bcl2fastq data frame:",e))
   )
 
   # Are any samples missing?
   miss_samps <- setdiff(comparisons$sample, qc_metrics$SampleName)
   if(length(miss_samps) > 0){
-    stop(paste("could not find the following comparison samples in the sequencing output (bcl2fastq):",miss_samps))
+    stop(paste("QC_fgc_crispr_data: could not find the following comparison samples in the sequencing output (bcl2fastq):",miss_samps))
   }
 
   # Output determined by screen type.
@@ -202,67 +207,9 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
 
     qc_metrics %<>%
       ### QC for count data.
-      ## Zero and low count plasmid gRNAs.
-      tibble::add_column(fgcQC::calc_low_zero_count_plasmid_gRNAs(counts, plasmid_samp),
-                       .before = "SampleId") %>%
-      ## Percent reads matching gRNAs.
-      fgcQC::calc_percent_matching_gRNAs(counts) %>%
-      ## Gini coefficients.
-      dplyr::left_join(fgcQC::calc_gini_coefficient_counts(counts), by = "SampleName") %>%
-      ## distance correlation between gRNA counts and GC content.
-      dplyr::left_join(fgcQC::calc_dcorr_GC_content_counts(counts_norm, library), by = "SampleName") %>%
-      ## inefficient gRNA (GCC and TT) count ratios.
-      dplyr::left_join(fgcQC::calc_inefficient_gRNA_count_ratios(counts_norm, library), by = "SampleName") %>%
-      ## GICC.
-      tibble::add_column(fgcQC::calc_GICC_gene_sets(counts_norm, fgcQC::crispr_gene_sets$essential,
-                                                  plasmid_samp, control_samp, treat_samp),
-                         .before = "SampleId") %>%
-      ## dispersion shrinkage estimator for Treat-Ctrl.
-      tibble::add_column(fgcQC::calc_dispersion_adj_gRNA(counts, control_samp, treat_samp),
-                         .before = "SampleId") %>%
+      fgcQC::assemble_counts_QC(counts, counts_norm, library, plasmid_samp, control_samp, treat_samp) %>%
       ### QC for logFC data.
-      ## NNMD.
-      tibble::add_column(fgcQC::calc_NNMD_gene_sets(lfc.ctrl_pl, lfc.treat_pl, fgcQC::crispr_gene_sets$essential),
-                         .before = "SampleId") %>%
-      ## NNMD_robust.
-      tibble::add_column(fgcQC::calc_NNMD_robust_gene_sets(lfc.ctrl_pl, lfc.treat_pl, fgcQC::crispr_gene_sets$essential),
-                         .before = "SampleId") %>%
-      ## distance correlation between gRNA logFC and GC content.
-      tibble::add_column(fgcQC::calc_dcorr_GC_content_logfc(lfc.ctrl_pl, library, "ctrl_plasmid"),
-                         .before = "SampleId") %>%
-      ## inefficient gRNA (GCC and TT) logFC ratios.
-      tibble::add_column(fgcQC::calc_inefficient_gRNA_logfc(lfc.ctrl_pl, library, "ctrl_plasmid"),
-                         .before = "SampleId") %>%
-      ## replicate logFC correlations.
-      tibble::add_column(fgcQC::calc_replicate_logfc_corr(lfc.ctrl_pl.repl, "ctrl_plasmid"),
-                         .before = "SampleId") %>%
-      tibble::add_column(fgcQC::calc_replicate_logfc_corr(lfc.treat_pl.repl, "treat_plasmid"),
-                         .before = "SampleId")
-
-    if(comparisons$goal[1] != "lethality"){
-      qc_metrics %<>%
-        ## distance correlation between gRNA logFC and GC content.
-        tibble::add_column(fgcQC::calc_dcorr_GC_content_logfc(lfc.treat_pl, library, "treat_plasmid"),
-                           .before = "SampleId") %>%
-        ## inefficient gRNA (GCC and TT) logFC ratios.
-        tibble::add_column(fgcQC::calc_inefficient_gRNA_logfc(lfc.treat_pl, library, "treat_plasmid"),
-                           .before = "SampleId")
-    }else{
-      qc_metrics %<>%
-        ## distance correlation between gRNA logFC and GC content.
-        tibble::add_column(data.frame(distcorr_GC_content_logfc.treat_plasmid = NA),
-                           .before = "SampleId") %>%
-        ## inefficient gRNA (GCC and TT) logFC ratios.
-        tibble::add_column(data.frame(log2FC_GCC_diff.treat_plasmid = NA, log2FC_TT_diff.treat_plasmid = NA),
-                           .before = "SampleId")
-    }
-
-    # Add NNMD for Control gRNAs (non-targeting guides), if they exist.
-    if(any(grepl("Control",library$sgRNA))){
-
-    }else{
-
-    }
+      fgcQC::assemble_logfc_QC(comparisons$goal[1], lfc.ctrl_pl, lfc.treat_pl, lfc.ctrl_pl.repl, lfc.treat_pl.repl, library)
 
     ### QC for Bagel binary classification data.
     bagel_roc <- fgcQC::add_bagel_ROC_gene_sets(bagel_ctrl_plasmid, bagel_treat_plasmid,
@@ -276,16 +223,13 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       ## AUPrRc.
       tibble::add_column(bagel_prroc$AUPrRc, .before = "SampleId")
 
-
-  }else{
-
   }
 
   # Write out QC metrics to a csv file.
   if(!is.null(output)){
     tryCatch(
       write.csv(qc_metrics, file = output, row.names=F, quote=F),
-      error = function(e) stop(paste("unable to write QC metric results to:",output,":",e))
+      error = function(e) stop(paste("QC_fgc_crispr_data: unable to write QC metric results to:",output,":",e))
     )
   }
 
@@ -314,5 +258,12 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
     ret$bagel_PrRc <- NA
   }
   class(ret) <- "fgcQC"
+
+  # Save R object.
+  if(!is.null(output_R_object)){
+    tryCatch(saveRDS(ret, file = paste(output_R_object,".rds"), compress="xz"),
+             error = function(e) stop(paste("QC_fgc_crispr_data: unable to save R object")))
+  }
+
   return(ret)
 }

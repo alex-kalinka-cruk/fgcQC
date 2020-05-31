@@ -15,3 +15,6 @@ A data frame with a column named `GC_percent`.
 \description{
 Calculates the GC percent of sgRNAs in a given library.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

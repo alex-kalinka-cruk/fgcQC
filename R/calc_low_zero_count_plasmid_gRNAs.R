@@ -13,6 +13,7 @@
 #' @param plasmid_sample_id A character string naming the plasmid sample ID in the column names of `counts`. If several plasmid samples are given, the median count will be used.
 #'
 #' @return A data frame containing two colums `percent_low_count_plasmid_gRNAs` and `percent_zero_count_plasmid_gRNAs`.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr summarise mutate
 #' @importFrom purrr pmap_dbl
 #' @export

@@ -15,3 +15,6 @@ A list containing all the sections in the JSON file.
 \description{
 Extracts sample and comparison data from an analysis config JSON file to be used as input for the AZ-CRUK CRISPR analysis pipeline.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

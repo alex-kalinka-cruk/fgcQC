@@ -6,6 +6,7 @@
 #' @param norm_total An integer specifying the fixed total number of reads each sample will be set to (e.g. 2e7). If `NULL`, then the median total across the samples is used.
 #'
 #' @return A data frame in which the sample columns are library-depth normalized.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @export
 normalize_library_depth_relative <- function(counts, norm_total){
   if(ncol(counts) < 3)

@@ -18,3 +18,6 @@ Extracts the proximal 4 bases upstream of the PAM in a sgRNA library data frame 
 \references{
 Graf, R. et al. (2019) sgRNA sequence motifs blocking efficient CRISPR/Cas9-mediated gene editing. Cell Rep 26: 1098-1103.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

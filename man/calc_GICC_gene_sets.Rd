@@ -29,3 +29,6 @@ A data frame with columns named `GICC.<comp>.<gene_set>` where '<comp' is one of
 \description{
 Calculates GICC for normalized counts given a list of gene sets.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

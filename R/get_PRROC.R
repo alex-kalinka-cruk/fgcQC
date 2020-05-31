@@ -7,14 +7,15 @@
 #' @param group_col A character string naming the grouping column of 'data'. If `NULL` then no group, defaults to `NULL`.
 #'
 #' @return A data frame containing the following columns: `Precision`, `Recall`, `Sensitivity_FDR_10pct`, `Sensitivity_FDR_10pct`, and `AUPrRc`.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr mutate filter select rename sym
 #' @importFrom PRROC pr.curve
 #' @export
 get_PRROC <- function(data, score_col, group_col = NULL){
   if(!"TP" %in% colnames(data))
-    stop("expecting to find a 'TP' column in 'data'")
+    stop("get_PRROC: expecting to find a 'TP' column in 'data'")
   if(!score_col %in% colnames(data))
-    stop(paste("expecting to find a",score_col,"column in 'data'"))
+    stop(paste("get_PRROC: expecting to find a",score_col,"column in 'data'"))
 
   tryCatch({
     sc <- dplyr::sym(score_col)

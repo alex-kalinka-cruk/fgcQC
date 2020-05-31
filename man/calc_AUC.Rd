@@ -14,8 +14,11 @@ calc_AUC(data, score_col, group = NULL)
 \item{group}{A character string naming a column by which to group 'data'. If `NULL` no grouping, defaults to `NULL`.}
 }
 \value{
-A data frame.
+A data frame containing an `AUC` column.
 }
 \description{
 Calculates AUROC in a data frame containing a 'TP' column.
+}
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
 }

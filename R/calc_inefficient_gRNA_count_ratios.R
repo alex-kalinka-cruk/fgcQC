@@ -6,6 +6,7 @@
 #' @param library A data frame containing the library file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID.
 #'
 #' @return A data frame containing three columns: `SampleName`, `norm_counts_GCC_ratio` and `norm_counts_TT_ratio`.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr mutate rowwise ungroup summarise_if group_by
 #' @references Graf, R. et al. (2019) sgRNA sequence motifs blocking efficient CRISPR/Cas9-mediated gene editing. Cell Rep 26: 1098-1103.
 #' @export

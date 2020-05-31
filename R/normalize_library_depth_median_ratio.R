@@ -12,6 +12,7 @@
 #' @param counts A data frame of counts for each sample in the study (samples as columns, gRNAs as rows).
 #'
 #' @return A data frame with 1 row and as many columns as `counts` with size factors for each experiment.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr mutate summarise select vars funs
 #' @importFrom purrr pmap_dbl
 #' @export
@@ -36,6 +37,7 @@ calc_median_normalization_size_factors <- function(counts){
 #' @param counts A data frame of counts for each sample in the study (samples as columns, gRNAs as rows).
 #'
 #' @return A data frame in which the sample columns are library-depth normalized.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr mutate
 #' @references Wang T, Wei JJ, Sabatini DM, Lander ES. Genetic screens in human cells using the CRISPR-Cas9 system. Science. 2014, 343: 80-84.
 #' Anders S, Huber W. Differential expression analysis for sequence count data. Genome Biol. 2010, 11: R106

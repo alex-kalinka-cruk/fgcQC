@@ -7,6 +7,7 @@
 #' @param col_suffix A character string providing a name to go at the end of the output column name (e.g. `ctrl_plasmid`).
 #'
 #' @return A data frame with a `SampleName` column and a `distcorr_GC_content_logfc` column.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr filter arrange sym
 #' @importFrom tibble tibble
 #' @importFrom rlang :=

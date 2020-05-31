@@ -17,3 +17,6 @@ A data frame containing two colums `percent_low_count_plasmid_gRNAs` and `percen
 \description{
 Caclculate the percentage of low (<30) and zero count gRNAs in the plasmid sample - these should be rare.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

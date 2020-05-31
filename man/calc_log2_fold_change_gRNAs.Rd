@@ -16,8 +16,11 @@ calc_log2_fold_change_gRNAs(counts, ref, comp, pseudo_count = 5)
 \item{pseudo_count}{A small integer specifying a pseudo-count to add to the counts to avoid log2(0) cases. Defaults to 5.}
 }
 \value{
-A data frame of log2 fold changes in which the columns are samples and the rows are sgRNAs
+A data frame of log2 fold changes in which the columns are samples and the rows are sgRNAs.
 }
 \description{
 Calculates log2 fold changes for sgRNAs from normalized counts. Median counts are taken across replicates.
+}
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
 }

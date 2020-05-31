@@ -7,6 +7,7 @@
 #' @param col_suffix A character string providing a name to go at the end of the output column name (e.g. `ctrl_plasmid`).
 #'
 #' @return A data frame containing two columns: `log2FC_GCC_diff` and `log2FC_TT_diff`.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr mutate filter rowwise sym
 #' @importFrom rlang :=
 #' @importFrom tibble tibble

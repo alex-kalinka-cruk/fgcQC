@@ -5,6 +5,8 @@
 #' @param logfc A data frame with columns `log2FC.repl_1` and `log2FC.repl_2`.
 #' @param suffix A character string naming the comparison: one of `ctrl_plasmid` and `treat_plasmid`.
 #'
+#' @return A data frame with `repl_log2FC_pearson_corr.<suffix>` columns.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom rlang :=
 #' @importFrom tibble tibble
 #' @references Hanna, R. E. and Doench, J. G. 2020. Design and analysis of CRISPR-Cas experiments. Nature Biotechnology.

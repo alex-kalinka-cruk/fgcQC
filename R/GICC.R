@@ -27,6 +27,7 @@
 #' `num.reps` - An integer giving the number of replicates.
 #' `conf.level` - The confidence level for the CI.
 #' `balanced.design` - A logical indicating if the design is balanced or not.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom matrixcalc direct.sum matrix.trace
 #' @references Ahrens, H. (1976). Multivariate variance-covariance components (MVCC) and generalized intraclass correlation coefficient (GICC). Biom. Z. 18, 527-533.
 #' @export

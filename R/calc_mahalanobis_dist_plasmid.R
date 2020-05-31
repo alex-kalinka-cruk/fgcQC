@@ -8,6 +8,7 @@
 #' @param treat_sample_id A character vector naming the treatment sample(s). Ignored if `NULL`.
 #'
 #' @return A data frame with the following column(s): `mahalanobis_dist_ratio.<comp>` where '<comp>' is one of 'ctrl_plasmid' or 'treat_plasmid'.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr filter
 #' @importFrom tibble rownames_to_column
 #' @export

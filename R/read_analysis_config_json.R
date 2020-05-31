@@ -5,6 +5,7 @@
 #' @param file A path to a valid analysis config JSON file.
 #'
 #' @return A list containing all the sections in the JSON file.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom jsonlite fromJSON
 read_analysis_config_json <- function(file){
   if(!file.exists(file)) stop(paste("unable to find",file))

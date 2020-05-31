@@ -5,6 +5,7 @@
 #' @param data A data frame of sequencing metrics derived ultimately from `fgcQC::extract_b2f_json`.
 #'
 #' @return A summarised data frame with one row per sample.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr group_by ungroup summarise select
 #' @importFrom magrittr %<>%
 #' @export
@@ -27,7 +28,7 @@ summarise_samples_bcl2fastq <- function(data){
       dplyr::ungroup() %>%
       dplyr::select(Flowcell:Q30_bases_samples_percent, SampleId, SampleName:Sample_Representation)
   },
-  error = function(e) stop(paste("unable to summarise bcl2fastq2 data:",e))
+  error = function(e) stop(paste("summarise_samples_bcl2fastq: unable to summarise bcl2fastq2 data:",e))
   )
   return(data)
 }

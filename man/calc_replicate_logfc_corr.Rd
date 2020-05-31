@@ -11,9 +11,15 @@ calc_replicate_logfc_corr(logfc, suffix)
 
 \item{suffix}{A character string naming the comparison: one of `ctrl_plasmid` and `treat_plasmid`.}
 }
+\value{
+A data frame with `repl_log2FC_pearson_corr.<suffix>` columns.
+}
 \description{
 Calculates logFC replicate Pearson correlations in accordance with recommendations by Hanna & Doench (2020).
 }
 \references{
 Hanna, R. E. and Doench, J. G. 2020. Design and analysis of CRISPR-Cas experiments. Nature Biotechnology.
+}
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
 }

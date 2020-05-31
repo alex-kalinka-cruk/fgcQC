@@ -19,3 +19,6 @@ A data frame containing the following columns: `Precision`, `Recall`, `Sensitivi
 \description{
 Returns precision and recall values for a data frame containing TP and a score metric (e.g. Bayes factor), or the AUPrRc.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

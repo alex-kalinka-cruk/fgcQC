@@ -17,3 +17,6 @@ A data frame in which the sample columns are library-depth normalized.
 \description{
 Normalizes library depth from a counts file by dividing the counts of each sample by its total and multiplying all samples by a constant total number of reads.
 }
+\author{
+Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
+}

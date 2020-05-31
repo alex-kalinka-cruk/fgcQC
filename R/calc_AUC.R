@@ -14,7 +14,8 @@
 #' @param score_col A character string naming the column to be used as a score column.
 #' @param group A character string naming a column by which to group 'data'. If `NULL` no grouping, defaults to `NULL`.
 #'
-#' @return A data frame.
+#' @return A data frame containing an `AUC` column.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr mutate summarise group_by sym
 #' @importFrom magrittr %<>%
 #' @export

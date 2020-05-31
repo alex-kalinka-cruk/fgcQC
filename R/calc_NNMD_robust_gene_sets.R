@@ -7,6 +7,7 @@
 #' @param gene_sets A named list of gene sets.
 #'
 #' @return A data frame with columns named `NNMD_robust.<comp>.<gene_set>` where '<comp' is one of 'ctrl_plasmid' or 'treat_plasmid', and '<gene_set>' is the name of each gene set provided in the `gene_sets` list.
+#' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr filter do select sym
 #' @importFrom tibble tibble
 #' @importFrom rlang :=
