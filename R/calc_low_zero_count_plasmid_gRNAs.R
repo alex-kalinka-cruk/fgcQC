@@ -14,7 +14,7 @@
 #'
 #' @return A data frame containing two colums `percent_low_count_plasmid_gRNAs` and `percent_zero_count_plasmid_gRNAs`.
 #' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
-#' @importFrom dplyr summarise mutate
+#' @importFrom dplyr summarise mutate n
 #' @importFrom purrr pmap_dbl
 #' @export
 calc_low_zero_count_plasmid_gRNAs <- function(counts, plasmid_sample_id){
@@ -27,8 +27,8 @@ calc_low_zero_count_plasmid_gRNAs <- function(counts, plasmid_sample_id){
         .l = .,
         .f = .median
       )) %>%
-      dplyr::summarise(percent_low_count_plasmid_gRNAs = 100*sum(median_count < 30, na.rm=T)/n(),
-                       percent_zero_count_plasmid_gRNAs = 100*sum(median_count == 0, na.rm=T)/n())
+      dplyr::summarise(percent_low_count_plasmid_gRNAs = 100*sum(median_count < 30, na.rm=T)/dplyr::n(),
+                       percent_zero_count_plasmid_gRNAs = 100*sum(median_count == 0, na.rm=T)/dplyr::n())
   },
   error = function(e) stop(paste("unable to calculate plasmid percent zero count gRNA:",e))
   )
