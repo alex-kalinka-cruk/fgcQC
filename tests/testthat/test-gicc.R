@@ -83,10 +83,10 @@ test_that("covariance matrices equal to Ahrens (1976) results for the iris datas
   #  or reproduced in Table 1 in Fisher (1936).
   # 2. Ahrens computed his values in 1976, unclear if this was by hand or not.
   tolerance <- 1e-4
-  # Ahrens (1976) covariance matrices (diagonal + upper triangle, column-major) 
+  # Ahrens (1976) covariance matrices (diagonal + upper triangle, column-major)
   #  for between and within subjects.
   # Reported in:
-  # Ahrens, H. (1976). Multivariate variance-covariance components (MVCC) 
+  # Ahrens, H. (1976). Multivariate variance-covariance components (MVCC)
   #   and generalized intraclass correlation coefficient (GICC). Biom. Z. 18, 527-533.
   cov.bsubj <- c(0.626799,-0.201354,0.111193,1.64915,-0.573505,4.367395,0.712032,
                  -0.229954,1.866947,0.803261)
@@ -114,8 +114,8 @@ test_that("GICC.1 is the same as in the Ahrens (1976) paper", {
 test_that("perfect reproducibility", {
   # Input data: 3 subject IDs, 3 replicates, 2 variables, no error variance:
   # expect maximum reproducibility of 1.
-  dpr <- data.frame(subj=as.character(rep(1:3,each=3)), 
-                    v1=rep(c(0.5,1,1.5),each=3), 
+  dpr <- data.frame(subj=as.character(rep(1:3,each=3)),
+                    v1=rep(c(0.5,1,1.5),each=3),
                     v2=rep(c(9.1,21.3,11.2),each=3), stringsAsFactors = F)
   pgicc <- GICC(dpr)
   expect_equal(pgicc$GICC[[1]], 1)
@@ -125,8 +125,8 @@ test_that("perfect reproducibility", {
 test_that("zero reproducibility", {
   # Input data: 3 subject IDs, 3 replicates, 2 variables, no between-subject variance:
   # expect minimum reproducibility of 0.
-  dzr <- data.frame(subj=as.character(rep(1:3,each=3)), 
-                    v1=rep(c(11.19,2.89,7.654),3), 
+  dzr <- data.frame(subj=as.character(rep(1:3,each=3)),
+                    v1=rep(c(11.19,2.89,7.654),3),
                     v2=rep(c(0.96,0.25,119.2),3), stringsAsFactors = F)
   zgicc <- GICC(dzr)
   expect_equal(zgicc$GICC[[1]], 0)
@@ -137,8 +137,8 @@ test_that("covariances have the expected sign", {
   tolerance <- 1e-10
   # Input data: 3 subject IDs, 3 replicates, 2 variables.
   # expect positive covariance.
-  dc <- data.frame(subj=as.character(rep(1:3,each=3)), 
-                   v1=rep(c(1.1,7.9,21.8),each=3), 
+  dc <- data.frame(subj=as.character(rep(1:3,each=3)),
+                   v1=rep(c(1.1,7.9,21.8),each=3),
                    v2=rep(c(0.12,4.13,5.19),each=3), stringsAsFactors = F)
   cg <- GICC(dc)
   expect_true(cg$cov.b[1,2] > 0)
@@ -152,15 +152,4 @@ test_that("covariances have the expected sign", {
   expect_equal(cg$cov.b[1,2], 0, tolerance=tolerance)
 })
 
-
-test_that("95% CI estimate contains simulated GICC.1 mean for ~95% of simulations", {
-  # Simulate large-ish number of subjects/replicates 1e3 times.
-  sg <- simul.gicc(30,10,3,1e3,0.95,1)
-  # Mean GICC in simulations.
-  msg <- mean(unlist(lapply(sg,function(x) x[1])))
-  # Percent CIs bounding the simulated mean.
-  pb <- round(100*sum(unlist(lapply(sg,function(x) msg>=x[2] & msg<=x[3])))/1e3)
-  # <3% from 95% being contained in the estimated CIs?
-  expect_gt(pb, 92)
-})
 

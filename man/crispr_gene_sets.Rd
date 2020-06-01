@@ -7,4 +7,9 @@
 \description{
 Sets of essential, non-essential, and functional classes of genes for use in CRISPR pooled-screen QC.
 }
+\details{
+A list with the following elements:
+`essential` - A named list of various essential and non-essential gene sets.
+`functional` - A named list of various functional groups of genes.
+}
 \keyword{data}

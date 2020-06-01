@@ -261,7 +261,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
 
   # Save R object.
   if(!is.null(output_R_object)){
-    tryCatch(saveRDS(ret, file = paste(output_R_object,".rds"), compress="xz"),
+    tryCatch(saveRDS(ret, file = paste(output_R_object,".rds",sep=""), compress="xz", version=2),
              error = function(e) stop(paste("QC_fgc_crispr_data: unable to save R object")))
   }
 

@@ -13,7 +13,7 @@
 #'
 #' @return A data frame with 1 row and as many columns as `counts` with size factors for each experiment.
 #' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
-#' @importFrom dplyr mutate summarise select vars funs
+#' @importFrom dplyr mutate summarise select vars
 #' @importFrom purrr pmap_dbl
 #' @export
 calc_median_normalization_size_factors <- function(counts){
@@ -23,7 +23,7 @@ calc_median_normalization_size_factors <- function(counts){
       .f = .geom_mean
     )) %>%
     dplyr::mutate_at(dplyr::vars(-sgRNA, -gene, -geom_mean),
-                     dplyr::funs(. / geom_mean)) %>%
+                     list(~ . / geom_mean)) %>%
     dplyr::summarise_at(dplyr::vars(-sgRNA, -gene, -geom_mean),
                         median)
   return(size_factors)

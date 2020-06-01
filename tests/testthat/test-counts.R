@@ -87,7 +87,7 @@ test_that("GICC calling function works",{
 
 ## Shrinkage estimator of count dispersion (DSS) for Treat-Ctrl.
 test_that("shrinkage estimator of count dispersion works",{
-  dss <- fgcQC::calc_dispersion_adj_gRNA(counts_mock,c("ctrl_1","ctrl_2"), c("treat_1","treat_2"))
+  dss <- fgcQC::calc_dispersion_adj_gRNA(counts_mock, c("ctrl_1","ctrl_2"), c("treat_1","treat_2"))
   expect_true(is.numeric(dss$dispersion_adj_gRNA.treat_ctrl))
   expect_true(dss$dispersion_adj_gRNA.treat_ctrl > 0)
 })
