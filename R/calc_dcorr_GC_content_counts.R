@@ -28,7 +28,7 @@ calc_dcorr_GC_content_counts <- function(counts, library){
                                                                 type = "U")) %>%
       dplyr::ungroup()
   },
-  error = function(e) stop(paste("unable to calculate dist corr for GC vs counts:",e))
+  error = function(e) stop(paste("calc_dcorr_GC_content_counts: unable to calculate dist corr for GC vs counts:",e))
   )
   return(ret)
 }

@@ -16,7 +16,7 @@ calc_GC_percent_library <- function(library){
       dplyr::mutate(GC_percent = 100*(sum(unlist(strsplit(V1,""))=="G") + sum(unlist(strsplit(V1,""))=="C"))/guide_len) %>%
       dplyr::ungroup()
     },
-    error = function(e) stop(paste("unable to calculate GC percent for library:",e))
+    error = function(e) stop(paste("calc_GC_percent_library: unable to calculate GC percent for library:",e))
   )
   return(library)
 }

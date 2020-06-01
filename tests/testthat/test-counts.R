@@ -1,7 +1,8 @@
 context("test-counts.R")
 library(dplyr)
+set.seed(4)
 
-## Tests related to counts QC functions.
+## Tests related to counts-based QC functions.
 
 ## Mock data.
 # Mock counts data frame.
@@ -30,8 +31,8 @@ make_guides <- function(guide_len, num_guides){
   guides <- sapply(guides, function(x) paste(sample(bases, guide_len, replace=T),collapse=""))
   return(guides)
 }
-library_mock <- data.frame(sgRNA = make_guides(20,10),
-                           gene = c(rep("A",5),rep("B",5)))
+library_mock <- data.frame(V1 = make_guides(20,10),
+                           V2 = letters[1:10], stringsAsFactors = F)
 
 
 ### Tests
@@ -48,7 +49,7 @@ test_that("percent matching gRNAs are correct",{
   perc_match <- fgcQC::calc_percent_matching_gRNAs(b2f_mock, counts_mock)
   pm <- perc_match$percent_reads_matching_gRNAs
   names(pm) <- NULL
-  expect_equal(pm, c(80.43478,51.53584,83.85417,84.40367,49.54128), tolerance = 1e5)
+  expect_equal(pm, c(80.43478,51.53584,83.85417,84.40367,49.54128), tolerance = 1e-5)
 })
 
 ## Gini coefficients.
@@ -60,6 +61,34 @@ test_that("Gini coefficients produced and correct",{
 
 ## Distance correlation GC content vs counts.
 test_that("distance correlation for GC content vs counts is working correctly",{
-  dc_counts <- fgcQC::calc_dcorr_GC_content_counts(counts_mock)
+  dc_counts <- fgcQC::calc_dcorr_GC_content_counts(counts_mock, library_mock)$distcorr_GC_content_counts
+  range_dcorr <- sapply(dc_counts, dplyr::between, -1, 1)
+  expect_true(all(range_dcorr))
+})
+
+## Inefficient gRNA (GCC and TT) count ratios.
+test_that("inefficient gRNA count ratios are correct",{
+  library_mock_ineff_guides <- library_mock
+  library_mock_ineff_guides$V1[1] <- paste(paste(rep("A",17),collapse=""),"GCC",sep="")
+  library_mock_ineff_guides$V1[2:3] <- paste(paste(rep("A",18),collapse=""),"TT",sep="")
+  icr <- fgcQC::calc_inefficient_gRNA_count_ratios(counts_mock, library_mock_ineff_guides)
+  expect_equal(icr$norm_counts_GCC_ratio, c(2.741935,3.641791,13.13043,2.285714,0), tolerance = 1e-5)
+  expect_equal(icr$norm_counts_TT_ratio, c(0.3548387,2.134328,3.304348,8.057143,7.5), tolerance = 1e-5)
+})
+
+## GICC.
+test_that("GICC calling function works",{
+  gicc <- fgcQC::calc_GICC_gene_sets(counts_mock, list(genes = "B"),
+                                     "plasmid", c("ctrl_1","ctrl_2"), c("treat_1","treat_2"))
+  expect_true(all(c(dplyr::between(gicc$GICC.ctrl_plasmid.genes,0,1),
+                    dplyr::between(gicc$GICC.treat_plasmid.genes,0,1),
+                    dplyr::between(gicc$GICC.treat_ctrl.genes,0,1))))
+})
+
+## Shrinkage estimator of count dispersion (DSS) for Treat-Ctrl.
+test_that("shrinkage estimator of count dispersion works",{
+  dss <- fgcQC::calc_dispersion_adj_gRNA(counts_mock,c("ctrl_1","ctrl_2"), c("treat_1","treat_2"))
+  expect_true(is.numeric(dss$dispersion_adj_gRNA.treat_ctrl))
+  expect_true(dss$dispersion_adj_gRNA.treat_ctrl > 0)
 })
 
