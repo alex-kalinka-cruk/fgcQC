@@ -38,7 +38,10 @@ assemble_counts_QC <- function(qc_metrics, counts, counts_norm, library,
                          .before = "SampleId") %>%
       ## dispersion shrinkage estimator for Treat-Ctrl.
       tibble::add_column(fgcQC::calc_dispersion_adj_gRNA(counts, control_samp, treat_samp),
-                         .before = "SampleId")
+                         .before = "SampleId") %>%
+      ## Mahalanobis distance to plasmid.
+      tibble::add_column(fgcQC::calc_mahalanobis_dist_plasmid(counts_norm, plasmid_samp,
+                                                              control_samp, treat_samp))
   },
   error = function(e) stop(paste("assemble_counts_QC: unable to build counts-based QC metrics:",e))
   )

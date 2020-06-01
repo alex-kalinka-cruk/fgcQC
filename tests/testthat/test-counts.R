@@ -92,3 +92,16 @@ test_that("shrinkage estimator of count dispersion works",{
   expect_true(dss$dispersion_adj_gRNA.treat_ctrl > 0)
 })
 
+## Mahalanobis distance to plasmid.
+test_that("Mahalanobis distance to plasmid is working",{
+  md <- fgcQC::calc_mahalanobis_dist_plasmid(counts_mock, "plasmid", c("ctrl_1","ctrl_2"),
+                                             c("treat_1","treat_2"))
+  md.fgc_0008 <- fgcQC::calc_mahalanobis_dist_plasmid(counts.fgc_0008,
+                                                      "Yusa_v3_KO_Plasmid_FGC_batch_1",
+                                                      c("FGC0008_01_01_04","FGC0008_01_01_05"),NULL)
+  expect_true(md$mahalanobis_dist_ratio.ctrl_plasmid > 1)
+  expect_true(md$mahalanobis_dist_ratio.treat_plasmid > 1)
+  expect_equal(md.fgc_0008$mahalanobis_dist_ratio.ctrl_plasmid, 0.7949783, tolerance=1e-5)
+})
+
+
