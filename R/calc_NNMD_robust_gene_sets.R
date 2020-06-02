@@ -27,7 +27,8 @@ calc_NNMD_robust_gene_sets <- function(lfc_ctrl_pl, lfc_treat_pl, gene_sets){
       if(!is.null(lfc_treat_pl)){
         # Treatment vs Plasmid.
         nnmd_tvp <- lfc_treat_pl %>%
-          dplyr::do(tibble::tibble(!!ncol := fgcQC::NNMD_robust(., "gene", "log2FC", gene_sets[[i]], noness)))
+          dplyr::do(tibble::tibble(!!ncol_tp := fgcQC::NNMD_robust(., "gene", "log2FC", gene_sets[[i]], noness)))
+        ret <- cbind(ret, nnmd_tvp)
       }else{
         nnmd_tvp <- tibble::tibble(!!ncol_tp := NA)
         ret <- cbind(ret, nnmd_tvp)

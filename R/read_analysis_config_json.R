@@ -7,17 +7,18 @@
 #' @return A list containing all the sections in the JSON file.
 #' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom jsonlite fromJSON
+#' @export
 read_analysis_config_json <- function(file){
   if(!file.exists(file)) stop(paste("unable to find",file))
 
   expected_sections <- c("samples","comparisons","meta","general","qc")
 
   tryCatch(jlist <- jsonlite::fromJSON(file),
-           error = function(e) stop("unable to process file",file,":",e))
+           error = function(e) stop("read_analysis_config_json: unable to process file",file,":",e))
 
   miss <- setdiff(expected_sections, names(jlist))
   if(length(miss) > 0)
-    stop(paste("analysis config is missing expected sections:",paste(miss,collapse=",")))
+    stop(paste("read_analysis_config_json: analysis config is missing expected sections:",paste(miss,collapse=",")))
 
   return(jlist)
 }

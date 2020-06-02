@@ -55,14 +55,15 @@ assemble_logfc_QC <- function(qc_metrics, screen_goal, lfc.ctrl_pl, lfc.treat_pl
     }
 
     # Add NNMD for Control gRNAs (non-targeting guides), if they exist.
-    if(any(grepl("^Control",library$sgRNA))){
-      ctrl_genes <- unique(library$gene[grepl("^Control",library$gene)])
+    if(any(grepl("^Control",library$V3))){
+      ctrl_genes <- unique(library$V3[grepl("^Control",library$V3)])
+      ctrl_gene_list <- list(control_guides = ctrl_genes, hart_nonessential = crispr_gene_sets$essential$hart_nonessential)
       qc_metrics %<>%
         ## NNMD.
-        tibble::add_column(fgcQC::calc_NNMD_gene_sets(lfc.ctrl_pl, lfc.treat_pl, list(control_guides = ctrl_genes)),
+        tibble::add_column(fgcQC::calc_NNMD_gene_sets(lfc.ctrl_pl, lfc.treat_pl, ctrl_gene_list),
                            .before = "SampleId") %>%
         ## NNMD_robust.
-        tibble::add_column(fgcQC::calc_NNMD_robust_gene_sets(lfc.ctrl_pl, lfc.treat_pl, list(control_guides = ctrl_genes)),
+        tibble::add_column(fgcQC::calc_NNMD_robust_gene_sets(lfc.ctrl_pl, lfc.treat_pl, ctrl_gene_list),
                            .before = "SampleId")
     }else{
       qc_metrics %<>%

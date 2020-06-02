@@ -9,9 +9,9 @@ assemble_counts_QC(
   counts,
   counts_norm,
   library,
-  plasmid_sample_id,
-  control_sample_id,
-  treat_sample_id
+  plasmid_samp,
+  control_samp,
+  treat_samp
 )
 }
 \arguments{
