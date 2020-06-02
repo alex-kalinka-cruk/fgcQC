@@ -22,4 +22,7 @@ Imports:
     rlang,
     energy,
     PRROC,
-    DSS
+    DSS,
+    magrittr,
+    tidyr,
+    matrixcalc
