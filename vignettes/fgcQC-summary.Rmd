@@ -33,6 +33,7 @@ vignette: >
 * Sample Labels from the analysis config do not contain any **confidential** information.
 * Processing individual analysis comparisons one at a time is feasible.
 * CRISPR-i and CRISPR-a screens will only return sequencing QC metrics.
+* Non-targeting guides are named 'Control' in the gene column of the library file.
 
 # Usage
 
@@ -53,10 +54,10 @@ qc <- QC_fgc_crispr_data(analysis_config = "path/to/analysis_config.json",
 
 # Unit Tests
 
-Run all unit tests from the root of the R package directory:
+All unit tests can be run from the root of the R package directory:
 
 ```{r,eval=F}
-devtools::test()
+devtools::test("path/to/fgcQC")
 ```
 
 

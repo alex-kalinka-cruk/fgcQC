@@ -41,6 +41,8 @@ Assumptions
     feasible.
 -   CRISPR-i and CRISPR-a screens will only return sequencing QC
     metrics.
+-   Non-targeting guides are named ‘Control’ in the gene column of the
+    library file.
 
 Usage
 =====
@@ -62,9 +64,9 @@ provided in a single comma-separated string. For lethality screens, set
 Unit Tests
 ==========
 
-Run all unit tests from the root of the R package directory:
+All unit tests can be run from the root of the R package directory:
 
-    devtools::test()
+    devtools::test("path/to/fgcQC")
 
 QC metrics
 ==========
