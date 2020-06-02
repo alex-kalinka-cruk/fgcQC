@@ -24,28 +24,30 @@ QC_fgc_crispr_data(
 
 \item{bagel_ctrl_plasmid}{A path to a valid Bagel tsv results file for Control vs Plasmid.}
 
-\item{bagel_treat_plasmid}{A path to a valid Bagel tsv results file for Treatment vs Plasmid. If `NULL`, no such file is available.}
+\item{bagel_treat_plasmid}{A path to a valid Bagel tsv results file for Treatment vs Plasmid. If \code{NULL}, no such file is available.}
 
-\item{bcl2fastq}{A character string giving one or more paths to valid `bcl2fastq2` summary output JSON files (paths separated by commas).}
+\item{bcl2fastq}{A character string giving one or more paths to valid \code{bcl2fastq2} summary output JSON files (paths separated by commas).}
 
 \item{library}{A valid path to a library tsv file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID (produced by the AZ-CRUK CRISPR reference data generation pipeline).}
 
 \item{comparison_name}{A character string naming a single comparison to extract QC data for (should correspond to the comparison name used in the analysis config JSON file).}
 
-\item{output}{A character string giving an output file name for the csv results. If `NULL`, do not write out any results.}
+\item{output}{A character string giving an output file name for the csv results. If \code{NULL}, do not write out any results.}
 
-\item{output_R_object}{A character string giving an output file name for the returned R object (useful for trouble-shooting). If `NULL`, do not save the R object.}
+\item{output_R_object}{A character string giving an output file name for the returned R object (useful for trouble-shooting). If \code{NULL}, do not save the R object.}
 
-\item{norm_method}{A character string naming a normalization method for the count data. Can be `median_ratio` or `relative`. Defaults to `median_ratio`.}
+\item{norm_method}{A character string naming a normalization method for the count data. Can be \code{median_ratio} or \code{relative}. Defaults to \code{median_ratio}.}
 }
 \value{
 A list containing the following elements:
-`qc_metrics` - A data frame containing QC metrics as columns and samples as rows; this data will also be written to the `output` file, if not `NULL`.
-`comparisons` - A data frame of samples belonging to the focal comparison.
-`seq_metrics` - A data frame of CI sequencing metrics at both flowcell and sample levels.
-`log2FC` - A list containing normalized counts and logFC data frames at both the gRNA and gene level.
-`bagel_ROC` - A list containing Bagel Bayes Factor data with `True_Positive_Rate` and `False_Positive_Rate` columns for specific `gene_sets`.
-`bagel_PrRc` - A list containing Precision-Recall data for different sample comparisons.
+\itemize{
+\item \code{qc_metrics} - A data frame containing QC metrics as columns and samples as rows; this data will also be written to the \code{output} file, if not \code{NULL}.
+\item \code{comparisons} - A data frame of samples belonging to the focal comparison.
+\item \code{seq_metrics} - A data frame of CI sequencing metrics at both flowcell and sample levels.
+\item \code{log2FC} - A list containing normalized counts and logFC data frames at both the gRNA and gene level.
+\item \code{bagel_ROC} - A list containing Bagel Bayes Factor data with \code{True_Positive_Rate} and \code{False_Positive_Rate} columns for specific \code{gene_sets}.
+\item \code{bagel_PrRc} - A list containing Precision-Recall data for different sample comparisons.
+}
 }
 \description{
 Produce Quality Control (QC) metrics from the following FGC CRISPR screen data inputs: an analysis config JSON file, a combined counts csv file, a Bagel results tsv file (Control vs Plasmid), a gRNA library tsv file ('cleanr.tsv'), and one or more bcl2fastq2 output JSON files ('Stats.json'). QC output will be returned for a single named comparison.

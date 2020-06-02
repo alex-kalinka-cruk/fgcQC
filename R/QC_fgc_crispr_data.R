@@ -71,12 +71,13 @@
 #' @param norm_method A character string naming a normalization method for the count data. Can be `median_ratio` or `relative`. Defaults to `median_ratio`.
 #'
 #' @return A list containing the following elements:
-#' `qc_metrics` - A data frame containing QC metrics as columns and samples as rows; this data will also be written to the `output` file, if not `NULL`.
-#' `comparisons` - A data frame of samples belonging to the focal comparison.
-#' `seq_metrics` - A data frame of CI sequencing metrics at both flowcell and sample levels.
-#' `log2FC` - A list containing normalized counts and logFC data frames at both the gRNA and gene level.
-#' `bagel_ROC` - A list containing Bagel Bayes Factor data with `True_Positive_Rate` and `False_Positive_Rate` columns for specific `gene_sets`.
-#' `bagel_PrRc` - A list containing Precision-Recall data for different sample comparisons.
+#' * `qc_metrics` - A data frame containing QC metrics as columns and samples as rows; this data will also be written to the `output` file, if not `NULL`.
+#' * `comparisons` - A data frame of samples belonging to the focal comparison.
+#' * `seq_metrics` - A data frame of CI sequencing metrics at both flowcell and sample levels.
+#' * `log2FC` - A list containing normalized counts and logFC data frames at both the gRNA and gene level.
+#' * `bagel_ROC` - A list containing Bagel Bayes Factor data with `True_Positive_Rate` and `False_Positive_Rate` columns for specific `gene_sets`.
+#' * `bagel_PrRc` - A list containing Precision-Recall data for different sample comparisons.
+#' @md
 #' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr mutate select filter right_join left_join everything inner_join
 #' @importFrom tibble add_column
