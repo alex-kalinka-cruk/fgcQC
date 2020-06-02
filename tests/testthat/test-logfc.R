@@ -36,7 +36,7 @@ lfc.fgc_0008 <- counts.fgc_0008 %>%
   fgcQC::normalize_library_depth_median_ratio() %>%
   fgcQC::calc_log2_fold_change_gRNAs(ref = "Yusa_v3_KO_Plasmid_FGC_batch_1",
                                      comp = c("FGC0008_01_01_04","FGC0008_01_01_05")) %>%
-  dplyr::inner_join(cleanr.lfc.fgc_0008, by = c("sgRNA" = "SEQID"))
+  dplyr::inner_join(fgcQC::cleanr.lfc.fgc_0008, by = c("sgRNA" = "SEQID"))
 
 
 ## Tests.
