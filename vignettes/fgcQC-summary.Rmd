@@ -15,7 +15,7 @@ vignette: >
 
 # Dependencies
 
-* `R` v3.6.1 (not tested on any other `R` versions).
+* `R` $\geq$ v3.6.1 (not tested on earlier versions).
 * CRAN `R` packages: `dplyr`, `tibble`, `tidyr`, `magrittr`, `rlang`, `purrr`, `jsonlite`, `ineq`, `energy`, `PRROC`, `matrixcalc`
 * Bioconductor `R` packages: `DSS`
 
@@ -103,7 +103,7 @@ QC metrics to the left of the `SampleId` column are experiment-wide, comparison-
 `percent_low_count_plasmid_gRNAs`|Percentage of plasmid gRNAs with less than 30 reads.|
 `percent_zero_plasmid_gRNAs`|Percentage of plasmid gRNAs with zero-count reads.|
 
-## Experimental
+## Novel
 
 |QC metric|Description|
 ----------|-----------|

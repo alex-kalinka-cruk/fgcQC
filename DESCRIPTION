@@ -12,7 +12,7 @@ Encoding: UTF-8
 LazyData: true
 Suggests: 
     testthat
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Imports: 
     dplyr,
     tibble,
@@ -25,4 +25,6 @@ Imports:
     DSS,
     magrittr,
     tidyr,
-    matrixcalc
+    matrixcalc,
+    stats,
+    utils

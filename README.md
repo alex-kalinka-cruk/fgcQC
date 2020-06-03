@@ -10,7 +10,7 @@ pipeline](https://bitbucket.astrazeneca.com/projects/DA/repos/az-cruk-crispr-pip
 Dependencies
 ============
 
--   `R` v3.6.1 (not tested on any other `R` versions).
+-   `R` ≥ v3.6.1 (not tested on earlier versions).
 -   CRAN `R` packages: `dplyr`, `tibble`, `tidyr`, `magrittr`, `rlang`,
     `purrr`, `jsonlite`, `ineq`, `energy`, `PRROC`, `matrixcalc`
 -   Bioconductor `R` packages: `DSS`
@@ -179,8 +179,8 @@ Standard
 </tbody>
 </table>
 
-Experimental
-------------
+Novel
+-----
 
 <table>
 <colgroup>

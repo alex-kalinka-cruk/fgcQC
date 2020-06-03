@@ -72,8 +72,12 @@ test_that("inefficient gRNA count ratios are correct",{
   library_mock_ineff_guides$V1[1] <- paste(paste(rep("A",17),collapse=""),"GCC",sep="")
   library_mock_ineff_guides$V1[2:3] <- paste(paste(rep("A",18),collapse=""),"TT",sep="")
   icr <- fgcQC::calc_inefficient_gRNA_count_ratios(counts_mock, library_mock_ineff_guides)
-  expect_equal(icr$norm_counts_GCC_ratio, c(2.741935,3.641791,13.13043,2.285714,0), tolerance = 1e-5)
-  expect_equal(icr$norm_counts_TT_ratio, c(0.3548387,2.134328,3.304348,8.057143,7.5), tolerance = 1e-5)
+  gcc <- icr$norm_counts_GCC_ratio
+  names(gcc) <- NULL
+  tt <- icr$norm_counts_TT_ratio
+  names(tt) <- NULL
+  expect_equal(gcc, c(2.741935,3.641791,13.13043,2.285714,0), tolerance = 1e-5)
+  expect_equal(tt, c(0.3548387,2.134328,3.304348,8.057143,7.5), tolerance = 1e-5)
 })
 
 ## GICC.
