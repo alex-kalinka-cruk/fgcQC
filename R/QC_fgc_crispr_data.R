@@ -10,7 +10,7 @@
   .file_exists(analysis_config)
   .file_exists(combined_counts)
   .file_exists(library)
-  if(is.null(.file_exists(bagel_ctrl_plasmid))){
+  if(is.null(bagel_ctrl_plasmid)){
     warning(".check_qc_inputs: no 'bagel_ctrl_plasmid' data available")
   }else{
     .file_exists(bagel_ctrl_plasmid)
@@ -127,8 +127,12 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
   tryCatch(library <- read.delim(library, skip = 1, header=F, stringsAsFactors = F),
            error = function(e) stop(paste("QC_fgc_crispr_data: unable to read library file",library,":",e)))
   # Bagel results.
-  tryCatch(bagel_ctrl_plasmid <- read.delim(bagel_ctrl_plasmid, sep="\t", header=T, stringsAsFactors = F),
-           error = function(e) stop(paste("QC_fgc_crispr_data: unable to read bagel ctrl-vs-plasmid file",bagel_ctrl_plasmid,":",e)))
+  if(!is.null(bagel_ctrl_plasmid)){
+    tryCatch(bagel_ctrl_plasmid <- read.delim(bagel_ctrl_plasmid, sep="\t", header=T, stringsAsFactors = F),
+             error = function(e) stop(paste("QC_fgc_crispr_data: unable to read bagel ctrl-vs-plasmid file",bagel_ctrl_plasmid,":",e)))
+  }else{
+    bagel_ctrl_plasmid <- NULL
+  }
   if(!is.null(bagel_treat_plasmid)){
     tryCatch(bagel_treat_plasmid <- read.delim(bagel_treat_plasmid, sep="\t", header=T, stringsAsFactors = F),
              error = function(e) stop(paste("QC_fgc_crispr_data: unable to read bagel treatment-vs-plasmid file",
