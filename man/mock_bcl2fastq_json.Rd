@@ -4,14 +4,16 @@
 \alias{mock_bcl2fastq_json}
 \title{mock_bcl2fastq_json}
 \usage{
-mock_bcl2fastq_json(sample_ids)
+mock_bcl2fastq_json(sample_ids, sample_names)
 }
 \arguments{
-\item{sample_ids}{A character vector naming the sample IDs to be mocked.}
+\item{sample_ids}{A character vector naming the sample IDs (indexes) to be mocked.}
+
+\item{sample_names}{A character vector of sample names extracted from the analysis config comparisons.}
 }
 \value{
 A file path to a temporary mock 'bcl2fastq' JSON file.
 }
 \description{
-Mock bcl2fastq data for a specified number of samples with given sample IDs (to match an analysis config), write to a temporary file, and return the temp file path.
+Mock bcl2fastq data for a specified number of samples with given sample IDs (to match an analysis config), write to a temporary file, and return the temporary file path.
 }

@@ -1,7 +1,7 @@
 # Helper functions.
 .file_exists <- function(file){
   if(!file.exists(file))
-    stop(paste("unable to find",file))
+    stop(paste(".check_qc_inputs: unable to find",file))
 }
 
 
@@ -11,7 +11,7 @@
   .file_exists(combined_counts)
   .file_exists(library)
   if(is.null(.file_exists(bagel_ctrl_plasmid))){
-    warning("No 'bagel_ctrl_plasmid' data available")
+    warning(".check_qc_inputs: no 'bagel_ctrl_plasmid' data available")
   }else{
     .file_exists(bagel_ctrl_plasmid)
   }
@@ -19,17 +19,17 @@
   if(!is.null(bagel_treat_plasmid))
     .file_exists(bagel_treat_plasmid)
   if(!is.character(bcl2fastq))
-    stop("'bcl2fastq' must be a character string pointing to one or more bcl2fastq2 output JSON files separated by commas")
+    stop(".check_qc_inputs: 'bcl2fastq' must be a comma-separated character string pointing to one or more bcl2fastq2 output JSON files")
   b2f <- unlist(strsplit(bcl2fastq,","))
   sapply(b2f, .file_exists)
   if(!is.character(comparison))
-    stop("'comparison_name' must be a character string naming a comparison in the analysis config JSON file")
+    stop(".check_qc_inputs: 'comparison_name' must be a character string naming a comparison in the analysis config JSON file")
   if(!is.character(output) & !is.null(output))
-    stop("'output' must be a character string naming an output file for QC results or NULL")
+    stop(".check_qc_inputs: 'output' must be a character string naming an output file for QC results or NULL")
   if(!is.character(output_R_object) & !is.null(output_R_object))
-    stop("'output_R_object' must be a character string naming an output file for the QC R object or NULL")
+    stop(".check_qc_inputs: 'output_R_object' must be a character string naming an output file for the QC R object or NULL")
   if(!norm_method %in% c("median_ratio","relative"))
-    stop("'norm_method' should be one of 'median_ratio' or 'relative'")
+    stop(".check_qc_inputs: 'norm_method' should be one of 'median_ratio' or 'relative'")
 }
 
 
@@ -39,7 +39,7 @@
   for(i in 1:length(b2f)){
     tryCatch(
       ret <- rbind(ret, fgcQC::extract_b2f_json(b2f[i])),
-      error = function(e) stop(paste("problem reading bcl2fastq2 data:",e))
+      error = function(e) stop(paste(".read_bcl2fastq: problem reading bcl2fastq2 data:",e))
     )
   }
   return(ret)
@@ -48,14 +48,14 @@
 
 .check_comparison <- function(comparisons, comparison_name, analysis_config){
   if(!comparison_name %in% comparisons$comparison)
-    stop(paste("unable to find comparison",comparison_name,"in",analysis_config))
+    stop(paste(".check_comparison: unable to find comparison",comparison_name,"in",analysis_config))
   if(!"plasmid" %in% comparisons$class)
-    stop(paste("unable to find any 'plasmid' samples in",comparison_name))
+    stop(paste(".check_comparison: unable to find any 'plasmid' samples in",comparison_name))
   if(!"control" %in% comparisons$class)
-    stop(paste("unable to find any 'control' samples in",comparison_name))
+    stop(paste(".check_comparison: unable to find any 'control' samples in",comparison_name))
   if(comparisons$goal[1] != "lethality"){
     if(!"treatment" %in% comparisons$class)
-      stop(paste("unable to find any 'treatment' samples in",comparison_name))
+      stop(paste(".check_comparison: unable to find any 'treatment' samples in",comparison_name))
   }
 }
 
@@ -94,7 +94,10 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
                                norm_method = "median_ratio", mock_missing_data = FALSE){
   ## Do we need to mock missing inputs?
   if(mock_missing_data){
-
+    mock_file_paths <- fgcQC::mock_missing_FGC_data(analysis_config, combined_counts, bcl2fastq, library)
+    analysis_config <- mock_file_paths$analysis_config
+    bcl2fastq <- mock_file_paths$bcl2fastq
+    library <- mock_file_paths$library
   }
 
   ### Prep.
