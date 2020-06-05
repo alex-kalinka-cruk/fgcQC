@@ -14,7 +14,8 @@ QC_fgc_crispr_data(
   comparison_name,
   output,
   output_R_object,
-  norm_method = "median_ratio"
+  norm_method = "median_ratio",
+  mock_missing_data = FALSE
 )
 }
 \arguments{
@@ -22,7 +23,7 @@ QC_fgc_crispr_data(
 
 \item{combined_counts}{A path to a valid combined counts csv file (produced by the AZ-CRUK CRISPR analysis pipeline).}
 
-\item{bagel_ctrl_plasmid}{A path to a valid Bagel tsv results file for Control vs Plasmid.}
+\item{bagel_ctrl_plasmid}{A path to a valid Bagel tsv results file for Control vs Plasmid. If \code{NULL}, no such file is available.}
 
 \item{bagel_treat_plasmid}{A path to a valid Bagel tsv results file for Treatment vs Plasmid. If \code{NULL}, no such file is available.}
 
@@ -37,6 +38,8 @@ QC_fgc_crispr_data(
 \item{output_R_object}{A character string giving an output file name for the returned R object (useful for trouble-shooting). If \code{NULL}, do not save the R object.}
 
 \item{norm_method}{A character string naming a normalization method for the count data. Can be \code{median_ratio} or \code{relative}. Defaults to \code{median_ratio}.}
+
+\item{mock_missing_data}{A logical indicating whether any missing inputs should be mocked or not. Defaults to \code{FALSE}.}
 }
 \value{
 A list containing the following elements:

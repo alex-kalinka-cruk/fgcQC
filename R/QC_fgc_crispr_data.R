@@ -9,8 +9,13 @@
                              output, output_R_object, norm_method, bagel_treat_plasmid){
   .file_exists(analysis_config)
   .file_exists(combined_counts)
-  .file_exists(bagel_ctrl_plasmid)
   .file_exists(library)
+  if(is.null(.file_exists(bagel_ctrl_plasmid))){
+    warning("No 'bagel_ctrl_plasmid' data available")
+  }else{
+    .file_exists(bagel_ctrl_plasmid)
+  }
+
   if(!is.null(bagel_treat_plasmid))
     .file_exists(bagel_treat_plasmid)
   if(!is.character(bcl2fastq))
@@ -61,7 +66,7 @@
 #'
 #' @param analysis_config A path to a valid analysis config JSON file to be used as input for the AZ-CRUK CRISPR analysis pipeline.
 #' @param combined_counts A path to a valid combined counts csv file (produced by the AZ-CRUK CRISPR analysis pipeline).
-#' @param bagel_ctrl_plasmid A path to a valid Bagel tsv results file for Control vs Plasmid.
+#' @param bagel_ctrl_plasmid A path to a valid Bagel tsv results file for Control vs Plasmid. If `NULL`, no such file is available.
 #' @param bagel_treat_plasmid A path to a valid Bagel tsv results file for Treatment vs Plasmid. If `NULL`, no such file is available.
 #' @param bcl2fastq A character string giving one or more paths to valid `bcl2fastq2` summary output JSON files (paths separated by commas).
 #' @param library A valid path to a library tsv file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID (produced by the AZ-CRUK CRISPR reference data generation pipeline).

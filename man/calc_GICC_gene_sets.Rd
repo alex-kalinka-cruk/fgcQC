@@ -24,7 +24,7 @@ calc_GICC_gene_sets(
 \item{treat_sample_id}{A character vector naming one or more treatment samples. If `NULL` then there are no treatment samples. Defaults to `NULL`.}
 }
 \value{
-A data frame with columns named `GICC.<comp>.<gene_set>` where '<comp' is one of 'ctrl_plasmid', 'treat_plasmid', or 'treat_ctrl', and '<gene_set>' is the name of each gene set provided in the `gene_sets` list.
+A data frame with columns named `GICC.<comp>.<gene_set>` where '<comp>' is one of 'ctrl_plasmid', 'treat_plasmid', or 'treat_ctrl', and '<gene_set>' is the name of each gene set provided in the `gene_sets` list.
 }
 \description{
 Calculates GICC for normalized counts given a list of gene sets.
