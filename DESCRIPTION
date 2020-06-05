@@ -1,6 +1,6 @@
 Package: fgcQC
 Title: QC metric calculations for CRISPR screen data produced at the FGC
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     person(given = "Alex",
            family = "Kalinka",
@@ -11,7 +11,9 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Suggests: 
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
 RoxygenNote: 7.1.0
 Imports: 
     dplyr,
@@ -28,3 +30,4 @@ Imports:
     matrixcalc,
     stats,
     utils
+VignetteBuilder: knitr

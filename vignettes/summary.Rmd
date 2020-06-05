@@ -5,13 +5,13 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{fgcQC}
+  %\VignetteIndexEntry{summary}
   %\VignetteEncoding{UTF-8}
 ---
 
 # Summary
 
-`fgcQC` is an `R` package that provides implementations of CRISPR QC metric calcluations pertaining to sequencing, laboratory, and analysis metrics - both standard and novel metrics are included. It is designed to ingest data produced by the [AZ-CRUK CRISPR analysis pipeline](https://bitbucket.astrazeneca.com/projects/DA/repos/az-cruk-crispr-pipeline/browse).
+`fgcQC` is an `R` package that provides implementations of CRISPR QC metric calcluations pertaining to sequencing, laboratory, and analysis data - both standard and novel metrics are included. It is designed to ingest data produced by the [AZ-CRUK CRISPR analysis pipeline](https://bitbucket.astrazeneca.com/projects/DA/repos/az-cruk-crispr-pipeline/browse).
 
 # Dependencies
 

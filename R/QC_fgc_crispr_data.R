@@ -69,6 +69,7 @@
 #' @param output A character string giving an output file name for the csv results. If `NULL`, do not write out any results.
 #' @param output_R_object A character string giving an output file name for the returned R object (useful for trouble-shooting). If `NULL`, do not save the R object.
 #' @param norm_method A character string naming a normalization method for the count data. Can be `median_ratio` or `relative`. Defaults to `median_ratio`.
+#' @param mock_missing_data A logical indicating whether any missing inputs should be mocked or not. Defaults to `FALSE`.
 #'
 #' @return A list containing the following elements:
 #' * `qc_metrics` - A data frame containing QC metrics as columns and samples as rows; this data will also be written to the `output` file, if not `NULL`.
@@ -85,7 +86,12 @@
 #' @export
 QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bagel_treat_plasmid,
                                bcl2fastq, library, comparison_name, output, output_R_object,
-                               norm_method = "median_ratio"){
+                               norm_method = "median_ratio", mock_missing_data = FALSE){
+  ## Do we need to mock missing inputs?
+  if(mock_missing_data){
+
+  }
+
   ### Prep.
   ## File path checks.
   .check_qc_inputs(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison_name,
@@ -159,7 +165,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
   }
 
   # Output determined by screen type.
-  if(comparisons$type[1] == "n"){
+  if(comparisons$type[1] != "a"){
     ## Normalize counts.
     if(norm_method == "median_ratio"){
       counts_norm <- fgcQC::normalize_library_depth_median_ratio(counts)
@@ -239,7 +245,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
   ret$qc_metrics <- qc_metrics
   ret$comparisons <- comparisons
   ret$seq_metrics <- b2f
-  if(comparisons$type[1] == "n"){
+  if(comparisons$type[1] != "a"){
     ret$log2FC <- list()
     ret$log2FC$control_vs_plasmid.gRNA <- lfc.ctrl_pl
     ret$log2FC$control_vs_plasmid.gene <- lfc.ctrl_pl.genes
