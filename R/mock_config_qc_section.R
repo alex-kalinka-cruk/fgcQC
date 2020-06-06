@@ -18,6 +18,11 @@ mock_config_qc_section <- function(config, sample_ids, sample_names){
       dplyr::slice(rep(1:dplyr::n(), each = num_samps)) %>%
       dplyr::mutate(name = sample_names, indexes = sample_ids)
     config$qc <- qc
+    # Are we missing a 'label' column in the config 'samples'?
+    if(!"label" %in% colnames(config$samples)){
+      config$samples %<>%
+        dplyr::mutate(label = paste("S",1:dplyr::n(),sep=""))
+    }
     config_file <- tempfile("mock_analysis_config.")
     jsonlite::write_json(config, config_file)
   },

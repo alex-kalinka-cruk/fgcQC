@@ -119,6 +119,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
     dplyr::select(-indexes, -label) %>%
     dplyr::filter(name %in% comparisons$sample)
 
+
   ## Read data.
   # counts.
   tryCatch(counts <- read.delim(combined_counts, sep="\t", header=T, stringsAsFactors = F),
@@ -169,6 +170,8 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
   },
   error = function(e) stop(paste("QC_fgc_crispr_data: unable to build bcl2fastq data frame:",e))
   )
+
+  return(qc_metrics)
 
   # Are any samples missing?
   miss_samps <- setdiff(comparisons$sample, qc_metrics$SampleName)
