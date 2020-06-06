@@ -61,26 +61,43 @@
 
 
 .make_dummy_bagel <- function(gene_set, type){
-  gene_set$hart_nonessential <- NULL
-  ret <- data.frame(dummy = NA)
-  for(genes in names(gene_set)){
-    ret %<>%
-      dplyr::mutate(!!paste(type,"ctrl_plasmid",genes,sep=".") := NA,
-                    !!paste(type,"treat_plasmid",genes,sep=".") := NA)
-    if(type == "AUPrRc"){
+  tryCatch({
+    gene_set$hart_nonessential <- NULL
+    ret <- data.frame(dummy = NA)
+    for(genes in names(gene_set)){
       ret %<>%
-        dplyr::mutate(!!paste("Sensitivity_FDR_10pct.ctrl_plasmid",genes,sep=".") := NA,
-                      !!paste("Sensitivity_FDR_5pct.ctrl_plasmid",genes,sep=".") := NA,
-                      !!paste("Sensitivity_FDR_10pct.treat_plasmid",genes,sep=".") := NA,
-                      !!paste("Sensitivity_FDR_5pct.treat_plasmid",genes,sep=".") := NA)
+        dplyr::mutate(!!paste(type,"ctrl_plasmid",genes,sep=".") := NA,
+                      !!paste(type,"treat_plasmid",genes,sep=".") := NA)
+      if(type == "AUPrRc"){
+        ret %<>%
+          dplyr::mutate(!!paste("Sensitivity_FDR_10pct.ctrl_plasmid",genes,sep=".") := NA,
+                        !!paste("Sensitivity_FDR_5pct.ctrl_plasmid",genes,sep=".") := NA,
+                        !!paste("Sensitivity_FDR_10pct.treat_plasmid",genes,sep=".") := NA,
+                        !!paste("Sensitivity_FDR_5pct.treat_plasmid",genes,sep=".") := NA)
+      }
     }
-  }
-  ret %<>% dplyr::select(-dummy)
-  if(type == "AUROC"){
-    return(list(AUROC = ret))
-  }else{
-    return(list(AUPrRc = ret))
-  }
+    ret %<>% dplyr::select(-dummy)
+    if(type == "AUROC"){
+      return(list(AUROC = ret))
+    }else{
+      return(list(AUPrRc = ret))
+    }
+  },
+  error = function(e) stop(paste(".make_dummy_bagel: unable to build dummy Bagel QC output:",e))
+  )
+}
+
+
+.add_masks_mocked_columns <- function(data, b2f, lib){
+  cols2mask <- dplyr::case_when((is.null(b2f) && is.null(lib)) ~ list(mask=c(fgcQC::mask_mocked_columns$bcl2fastq,
+                                                                   fgcQC::mask_mocked_columns$library)),
+                                (is.null(b2f) && !is.null(lib)) ~ list(mask=fgcQC::mask_mocked_columns$bcl2fastq),
+                                (!is.null(b2f) && is.null(lib)) ~ list(mask=fgcQC::mask_mocked_columns$library),
+                                (!is.null(b2f) && !is.null(lib)) ~ list(mask=NULL))
+  if(is.null(unlist(cols2mask)))
+    return(data)
+  data[,unlist(cols2mask)] <- NA
+  return(data)
 }
 
 
@@ -109,7 +126,7 @@
 #' * `bagel_PrRc` - A list containing Precision-Recall data for different sample comparisons.
 #' @md
 #' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
-#' @importFrom dplyr mutate select filter right_join left_join everything inner_join
+#' @importFrom dplyr mutate select filter right_join left_join everything inner_join case_when
 #' @importFrom tibble add_column
 #' @importFrom magrittr %<>%
 #' @export
@@ -272,6 +289,11 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       ## AUPrRc.
       tibble::add_column(bagel_prroc$AUPrRc, .before = "SampleId")
 
+  }
+
+  # Mask mocked columns, if needed.
+  if(mock_missing_data){
+    qc_metrics <- .add_masks_mocked_columns(qc_metrics, bcl2fastq, library)
   }
 
   # Write out QC metrics to a csv file.
