@@ -27,6 +27,7 @@
 #' `num.reps` - An integer giving the number of replicates.
 #' `conf.level` - The confidence level for the CI.
 #' `balanced.design` - A logical indicating if the design is balanced or not.
+#' @md
 #' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom matrixcalc direct.sum matrix.trace
 #' @references Ahrens, H. (1976). Multivariate variance-covariance components (MVCC) and generalized intraclass correlation coefficient (GICC). Biom. Z. 18, 527-533.
@@ -45,12 +46,19 @@ GICC <- function(data, return.cov = TRUE, all.gicc = FALSE, conf.level = 0.95){
   # G is the Multivariate error SS.
   #
   ## Check input data.
-  if(class(data[,1])!="factor" && class(data[,1])!="character"){
+  if(!inherits(data[,1],"factor") && !inherits(data[,1],"character")){
     stop("GICC: first column of input data must contain subject IDs,
          columns 2 onwards must contain numerical data")
   }
   # Is the data balanced by subject?
   bs.count <- table(data[,1])
+
+  # Does at least one of the subjects have a minimum of 2 replicates?
+  if(max(bs.count) < 2){
+    warning(paste("at least one subject must have >= 2 replicates:",data[,1]))
+    return(list(GICC = list(GICC.1 = NA)))
+  }
+
   rep.by.subj <- length(unique(bs.count))
   # Data must be ordered by subject IDs.
   data <- data[order(data[,1]),]

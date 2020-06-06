@@ -171,8 +171,6 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
   error = function(e) stop(paste("QC_fgc_crispr_data: unable to build bcl2fastq data frame:",e))
   )
 
-  return(qc_metrics)
-
   # Are any samples missing?
   miss_samps <- setdiff(comparisons$sample, qc_metrics$SampleName)
   if(length(miss_samps) > 0){
