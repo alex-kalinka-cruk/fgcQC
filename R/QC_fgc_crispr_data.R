@@ -89,15 +89,19 @@
 
 
 .add_masks_mocked_columns <- function(data, b2f, lib){
-  cols2mask <- dplyr::case_when((is.null(b2f) && is.null(lib)) ~ list(mask=c(fgcQC::mask_mocked_columns$bcl2fastq,
-                                                                   fgcQC::mask_mocked_columns$library)),
-                                (is.null(b2f) && !is.null(lib)) ~ list(mask=fgcQC::mask_mocked_columns$bcl2fastq),
-                                (!is.null(b2f) && is.null(lib)) ~ list(mask=fgcQC::mask_mocked_columns$library),
-                                (!is.null(b2f) && !is.null(lib)) ~ list(mask=NULL))
-  if(is.null(unlist(cols2mask)))
+  tryCatch({
+    cols2mask <- dplyr::case_when((is.null(b2f) && is.null(lib)) ~ list(mask=c(fgcQC::mask_mocked_columns$bcl2fastq,
+                                                                     fgcQC::mask_mocked_columns$library)),
+                                  (is.null(b2f) && !is.null(lib)) ~ list(mask=fgcQC::mask_mocked_columns$bcl2fastq),
+                                  (!is.null(b2f) && is.null(lib)) ~ list(mask=fgcQC::mask_mocked_columns$library),
+                                  (!is.null(b2f) && !is.null(lib)) ~ list(mask=NULL))
+    if(is.null(unlist(cols2mask)))
+      return(data)
+    data[,unlist(cols2mask)] <- NA
     return(data)
-  data[,unlist(cols2mask)] <- NA
-  return(data)
+  },
+  error = function(e) stop(paste(".add_masks_mocked_columns: unable to mask mocked columns:",e))
+  )
 }
 
 
