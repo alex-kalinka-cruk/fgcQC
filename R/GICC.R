@@ -20,13 +20,13 @@
 #' @param conf.level A numeric value between 0 and 1 indicating the desired confidence level for the GICC confidence interval.
 #'
 #' @return A list with the following components:
-#' `GICC` - A list with the various GICC measures from Ahrens original paper. Use `GICC.1` for the one advocated by Ahrens.
-#' `num.var` - An integer giving the number of variables.
-#' `num.samps` - An integer giving the number of samples.
-#' `num.subj` - An integer giving the number of subjects.
-#' `num.reps` - An integer giving the number of replicates.
-#' `conf.level` - The confidence level for the CI.
-#' `balanced.design` - A logical indicating if the design is balanced or not.
+#' * `GICC` - A list with the various GICC measures from Ahrens original paper. Use `GICC.1` for the one advocated by Ahrens.
+#' * `num.var` - An integer giving the number of variables.
+#' * `num.samps` - An integer giving the number of samples.
+#' * `num.subj` - An integer giving the number of subjects.
+#' * `num.reps` - An integer giving the number of replicates.
+#' * `conf.level` - The confidence level for the CI.
+#' * `balanced.design` - A logical indicating if the design is balanced or not.
 #' @md
 #' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom matrixcalc direct.sum matrix.trace

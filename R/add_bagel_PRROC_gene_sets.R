@@ -1,6 +1,6 @@
 #' add_bagel_PRROC_gene_sets
 #'
-#' Adds True Positive and False Positive columns to Bagel output for a list of gene sets and calculates AUROC for each gene set: all relative to the Hart non-essential genes.
+#' Adds Precision, Recall, and Sensitivity columns to Bagel output for a list of gene sets and calculates AUPrRc for each gene set: all relative to the Hart non-essential genes.
 #'
 #' @param bagel_ctrl_pl A data frame containing Bagel Bayes Factors results for Control vs Plasmid.
 #' @param bagel_treat_pl A data frame containing Bagel Bayes Factors results for Treatment vs Plasmid. Ignored if `NULL`.
@@ -9,7 +9,7 @@
 #' @return A list with the following elements:
 #' `bagel_ctrl_plasmid` - The original data frame with columns `gene_set`, `True_Positive_Rate.<gene_set>`, `False_Positive_Rate.<gene_set>` where '<gene_set>' is the name of a gene set.
 #' `bagel_treat_plasmid` - The original data frame with columns `gene_set`, `True_Positive_Rate.<gene_set>` and `False_Positive_Rate.<gene_set>` where '<gene_set>' is the name of a gene set. `NULL` if not given.
-#' `AUPrRc` - A data frame containing columns `AUPrRc.<comp>.<gene_set>` where '<comp>' is either 'ctrl_plasmid' or 'treat_plasmid' and <gene_set>' is the name of a gene set.
+#' `AUPrRc` - A data frame containing columns `AUPrRc.<comp>.<gene_set>` where '<comp>' is either 'ctrl_plasmid' or 'treat_plasmid' and <gene_set>' is the name of a gene set, and `Sensitivity_FDR_10pct.<comp>.<gene_set>` and `Sensitivity_FDR_5pct.<comp>.<gene_set>`.
 #' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr mutate sym rename select filter
 #' @importFrom magrittr %<>%

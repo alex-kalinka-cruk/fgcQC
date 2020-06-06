@@ -17,13 +17,15 @@ GICC(data, return.cov = TRUE, all.gicc = FALSE, conf.level = 0.95)
 }
 \value{
 A list with the following components:
-\code{GICC} - A list with the various GICC measures from Ahrens original paper. Use \code{GICC.1} for the one advocated by Ahrens.
-\code{num.var} - An integer giving the number of variables.
-\code{num.samps} - An integer giving the number of samples.
-\code{num.subj} - An integer giving the number of subjects.
-\code{num.reps} - An integer giving the number of replicates.
-\code{conf.level} - The confidence level for the CI.
-\code{balanced.design} - A logical indicating if the design is balanced or not.
+\itemize{
+\item \code{GICC} - A list with the various GICC measures from Ahrens original paper. Use \code{GICC.1} for the one advocated by Ahrens.
+\item \code{num.var} - An integer giving the number of variables.
+\item \code{num.samps} - An integer giving the number of samples.
+\item \code{num.subj} - An integer giving the number of subjects.
+\item \code{num.reps} - An integer giving the number of replicates.
+\item \code{conf.level} - The confidence level for the CI.
+\item \code{balanced.design} - A logical indicating if the design is balanced or not.
+}
 }
 \description{
 Calculates Ahrens (1976) multivariate generalized intraclass correlation coefficient (GICC).

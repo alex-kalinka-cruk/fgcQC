@@ -60,6 +60,30 @@
 }
 
 
+.make_dummy_bagel <- function(gene_set, type){
+  gene_set$hart_nonessential <- NULL
+  ret <- data.frame(dummy = NA)
+  for(genes in names(gene_set)){
+    ret %<>%
+      dplyr::mutate(!!paste(type,"ctrl_plasmid",genes,sep=".") := NA,
+                    !!paste(type,"treat_plasmid",genes,sep=".") := NA)
+    if(type == "AUPrRc"){
+      ret %<>%
+        dplyr::mutate(!!paste("Sensitivity_FDR_10pct.ctrl_plasmid",genes,sep=".") := NA,
+                      !!paste("Sensitivity_FDR_5pct.ctrl_plasmid",genes,sep=".") := NA,
+                      !!paste("Sensitivity_FDR_10pct.treat_plasmid",genes,sep=".") := NA,
+                      !!paste("Sensitivity_FDR_5pct.treat_plasmid",genes,sep=".") := NA)
+    }
+  }
+  ret %<>% dplyr::select(-dummy)
+  if(type == "AUROC"){
+    return(list(AUROC = ret))
+  }else{
+    return(list(AUPrRc = ret))
+  }
+}
+
+
 #' QC_fgc_crispr_data
 #'
 #' Produce Quality Control (QC) metrics from the following FGC CRISPR screen data inputs: an analysis config JSON file, a combined counts csv file, a Bagel results tsv file (Control vs Plasmid), a gRNA library tsv file ('cleanr.tsv'), and one or more bcl2fastq2 output JSON files ('Stats.json'). QC output will be returned for a single named comparison.
@@ -238,8 +262,8 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       bagel_prroc <- fgcQC::add_bagel_PRROC_gene_sets(bagel_ctrl_plasmid, bagel_treat_plasmid,
                                                 fgcQC::crispr_gene_sets$essential)
     }else{
-      bagel_roc <- .make_dummy_bagel_AUROC()
-      bagel_prroc <- .make_dummy_bagel_PRROC()
+      bagel_roc <- .make_dummy_bagel(fgcQC::crispr_gene_sets$essential, "AUROC")
+      bagel_prroc <- .make_dummy_bagel(fgcQC::crispr_gene_sets$essential, "AUPrRc")
     }
 
     qc_metrics %<>%
