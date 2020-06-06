@@ -232,10 +232,15 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       fgcQC::assemble_logfc_QC(comparisons$goal[1], lfc.ctrl_pl, lfc.treat_pl, lfc.ctrl_pl.repl, lfc.treat_pl.repl, library)
 
     ### QC for Bagel binary classification data.
-    bagel_roc <- fgcQC::add_bagel_ROC_gene_sets(bagel_ctrl_plasmid, bagel_treat_plasmid,
+    if(!is.null(bagel_ctrl_plasmid)){
+      bagel_roc <- fgcQC::add_bagel_ROC_gene_sets(bagel_ctrl_plasmid, bagel_treat_plasmid,
                                                 fgcQC::crispr_gene_sets$essential)
-    bagel_prroc <- fgcQC::add_bagel_PRROC_gene_sets(bagel_ctrl_plasmid, bagel_treat_plasmid,
+      bagel_prroc <- fgcQC::add_bagel_PRROC_gene_sets(bagel_ctrl_plasmid, bagel_treat_plasmid,
                                                 fgcQC::crispr_gene_sets$essential)
+    }else{
+      bagel_roc <- .make_dummy_bagel_AUROC()
+      bagel_prroc <- .make_dummy_bagel_PRROC()
+    }
 
     qc_metrics %<>%
       ## AUROC.

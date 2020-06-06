@@ -9,21 +9,21 @@ GICC(data, return.cov = TRUE, all.gicc = FALSE, conf.level = 0.95)
 \arguments{
 \item{data}{A matrix or data frame of multivariate data in which the first column contains between-subject identifiers and the remaining columns are the variables measured on these subjects.}
 
-\item{return.cov}{A logical indicating whether to return the covariance matrix or not. Defaults to `TRUE`.}
+\item{return.cov}{A logical indicating whether to return the covariance matrix or not. Defaults to \code{TRUE}.}
 
-\item{all.gicc}{A logical indicating whether to return all of Ahrens GICC measures. Defaults to `FALSE`.}
+\item{all.gicc}{A logical indicating whether to return all of Ahrens GICC measures. Defaults to \code{FALSE}.}
 
 \item{conf.level}{A numeric value between 0 and 1 indicating the desired confidence level for the GICC confidence interval.}
 }
 \value{
 A list with the following components:
-`GICC` - A list with the various GICC measures from Ahrens original paper. Use `GICC.1` for the one advocated by Ahrens.
-`num.var` - An integer giving the number of variables.
-`num.samps` - An integer giving the number of samples.
-`num.subj` - An integer giving the number of subjects.
-`num.reps` - An integer giving the number of replicates.
-`conf.level` - The confidence level for the CI.
-`balanced.design` - A logical indicating if the design is balanced or not.
+\code{GICC} - A list with the various GICC measures from Ahrens original paper. Use \code{GICC.1} for the one advocated by Ahrens.
+\code{num.var} - An integer giving the number of variables.
+\code{num.samps} - An integer giving the number of samples.
+\code{num.subj} - An integer giving the number of subjects.
+\code{num.reps} - An integer giving the number of replicates.
+\code{conf.level} - The confidence level for the CI.
+\code{balanced.design} - A logical indicating if the design is balanced or not.
 }
 \description{
 Calculates Ahrens (1976) multivariate generalized intraclass correlation coefficient (GICC).
