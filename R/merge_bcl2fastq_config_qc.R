@@ -2,8 +2,10 @@
 #'
 #' Merge bcl2fastq sequencing metrics with the QC section in the analysis config.
 #'
-#' @param
-#' @return A data frame
+#' @param b2f A data frame of `bcl2fastq` sequencing metrics.
+#' @param qc_config A data frame of QC metrics taken from the 'qc' section of the analysis config JSON.
+#' @param comparisons A data frame of comparisons taken from the 'comparisons' section of the analysis config JSON.
+#' @return A data frame.
 #' @importFrom dplyr right_join mutate select everything
 #' @export
 merge_bcl2fastq_config_qc <- function(b2f, qc_config, comparisons){

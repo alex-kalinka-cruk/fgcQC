@@ -130,8 +130,8 @@
 #' @param combined_counts A path to a valid combined counts csv file (produced by the AZ-CRUK CRISPR analysis pipeline).
 #' @param bagel_ctrl_plasmid A path to a valid Bagel tsv results file for Control vs Plasmid. If `NULL`, no such file is available.
 #' @param bagel_treat_plasmid A path to a valid Bagel tsv results file for Treatment vs Plasmid. If `NULL`, no such file is available.
-#' @param bcl2fastq A character string giving one or more paths to valid `bcl2fastq2` summary output JSON files (paths separated by commas).
-#' @param library A valid path to a library tsv file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID (produced by the AZ-CRUK CRISPR reference data generation pipeline).
+#' @param bcl2fastq A character string giving one or more paths to valid `bcl2fastq2` summary output JSON files (paths separated by commas). May be `NULL` if `mock_missing_data` argument is `TRUE`.
+#' @param library A valid path to a library tsv file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID (produced by the AZ-CRUK CRISPR reference data generation pipeline). May be `NULL` if `mock_missing_data` argument is `TRUE`.
 #' @param comparison_name A character string naming a single comparison to extract QC data for (should correspond to the comparison name used in the analysis config JSON file).
 #' @param output A character string giving an output file name for the csv results. If `NULL`, do not write out any results.
 #' @param output_R_object A character string giving an output file name for the returned R object (useful for trouble-shooting). If `NULL`, do not save the R object.
@@ -145,6 +145,14 @@
 #' * `log2FC` - A list containing normalized counts and logFC data frames at both the gRNA and gene level.
 #' * `bagel_ROC` - A list containing Bagel Bayes Factor data with `True_Positive_Rate` and `False_Positive_Rate` columns for specific `gene_sets`.
 #' * `bagel_PrRc` - A list containing Precision-Recall data for different sample comparisons.
+#' @details There are 7 main steps in the function:
+#' 1. Check inputs (mock missing data, if needed).
+#' 2. Read data.
+#' 3. QC for sequencing metrics (merge with qc data in analysis config).
+#' 4. Normalize counts and calculate logFC data.
+#' 5. QC for counts and logFC data.
+#' 6. QC for Bagel Bayes Factors.
+#' 7. Wrap up and write out results (mask any mocked columns).
 #' @md
 #' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr mutate select filter left_join inner_join case_when
@@ -154,15 +162,17 @@
 QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bagel_treat_plasmid,
                                bcl2fastq, library, comparison_name, output, output_R_object,
                                norm_method = "median_ratio", mock_missing_data = FALSE){
+  ### 1. Prep.
   ## Do we need to mock missing inputs?
   if(mock_missing_data){
+    mask_bcl2fastq <- bcl2fastq
+    mask_library <- library
     mock_file_paths <- fgcQC::mock_missing_FGC_data(analysis_config, combined_counts, bcl2fastq, library)
     analysis_config <- mock_file_paths$analysis_config
     bcl2fastq <- mock_file_paths$bcl2fastq
     library <- mock_file_paths$library
   }
 
-  ### Prep.
   ## File path checks.
   .check_qc_inputs(analysis_config, combined_counts, bagel_ctrl_plasmid, bcl2fastq, library, comparison_name,
                    output, output_R_object, norm_method, bagel_treat_plasmid)
@@ -180,9 +190,10 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
   qc_config <- json_list$qc %>%
     dplyr::select(-indexes, -label) %>%
     dplyr::filter(name %in% comparisons$sample)
+  ##-----------------------------------
 
 
-  ## Read data.
+  ### 2. Read data.
   # counts.
   tryCatch(counts <- read.delim(combined_counts, sep="\t", header=T, stringsAsFactors = F),
            error = function(e) stop(paste("QC_fgc_crispr_data: unable to read combined counts file",combined_counts,":",e)))
@@ -203,9 +214,10 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
   }else{
     bagel_treat_plasmid <- NULL
   }
+  ##-----------------------------------
 
 
-  ### QC for sequencing metrics (bcl2fastq2 output).
+  ### 3. QC for sequencing metrics (bcl2fastq2 output).
   b2f <- .prep_bcl2fastq(bcl2fastq, comparisons, json_list)
 
   if(any(!b2f$SampleName %in% qc_config$name))
@@ -218,11 +230,12 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
   miss_samps <- setdiff(comparisons$sample, qc_metrics$SampleName)
   if(length(miss_samps) > 0)
     stop(paste("QC_fgc_crispr_data: could not find the following comparison samples in the sequencing output (bcl2fastq):",miss_samps))
+  ##-----------------------------------
 
 
+  ### 4. Normalize counts and calculate logFC data for QC metric calculations.
   # Output determined by screen type.
   if(comparisons$type[1] != "a"){
-    ### Prep data for QC metric calculations.
     ## Normalize counts.
     if(norm_method == "median_ratio"){
       counts_norm <- fgcQC::normalize_library_depth_median_ratio(counts)
@@ -268,16 +281,19 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
     }else{
       lfc.treat_pl.repl <- NULL
     }
+    ##-----------------------------------
 
 
-    ### QC metric calculations.
+    ### 5. QC metric calculations for counts and logFC data.
     qc_metrics %<>%
       ### QC for count data.
       fgcQC::assemble_counts_QC(counts, counts_norm, library, plasmid_samp, control_samp, treat_samp) %>%
       ### QC for logFC data.
       fgcQC::assemble_logfc_QC(comparisons$goal[1], lfc.ctrl_pl, lfc.treat_pl, lfc.ctrl_pl.repl, lfc.treat_pl.repl, library)
+    ##-----------------------------------
 
-    ### QC for Bagel binary classification data.
+
+    ### 6. QC for Bagel binary classification data.
     if(!is.null(bagel_ctrl_plasmid)){
       bagel_roc <- fgcQC::add_bagel_ROC_gene_sets(bagel_ctrl_plasmid, bagel_treat_plasmid,
                                                 fgcQC::crispr_gene_sets$essential)
@@ -293,12 +309,14 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       tibble::add_column(bagel_roc$AUROC, .before = "SampleId") %>%
       ## AUPrRc.
       tibble::add_column(bagel_prroc$AUPrRc, .before = "SampleId")
-
+    ##-----------------------------------
   }
 
+
+  ### 7. Wrap up, write out results, and prep return object.
   # Mask mocked columns, if needed.
   if(mock_missing_data){
-    qc_metrics <- .add_masks_mocked_columns(qc_metrics, bcl2fastq, library)
+    qc_metrics <- .add_masks_mocked_columns(qc_metrics, mask_bcl2fastq, mask_library)
   }
 
   # Write out QC metrics to a csv file.
@@ -340,6 +358,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
     tryCatch(saveRDS(ret, file = paste(output_R_object,".rds",sep=""), compress="xz", version=2),
              error = function(e) stop(paste("QC_fgc_crispr_data: unable to save R object")))
   }
+  ##-----------------------------------
 
   return(ret)
 }

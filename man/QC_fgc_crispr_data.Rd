@@ -27,9 +27,9 @@ QC_fgc_crispr_data(
 
 \item{bagel_treat_plasmid}{A path to a valid Bagel tsv results file for Treatment vs Plasmid. If \code{NULL}, no such file is available.}
 
-\item{bcl2fastq}{A character string giving one or more paths to valid \code{bcl2fastq2} summary output JSON files (paths separated by commas).}
+\item{bcl2fastq}{A character string giving one or more paths to valid \code{bcl2fastq2} summary output JSON files (paths separated by commas). May be \code{NULL} if \code{mock_missing_data} argument is \code{TRUE}.}
 
-\item{library}{A valid path to a library tsv file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID (produced by the AZ-CRUK CRISPR reference data generation pipeline).}
+\item{library}{A valid path to a library tsv file in which the first column gives the sgRNA sequence and the second column gives the sgRNA ID (produced by the AZ-CRUK CRISPR reference data generation pipeline). May be \code{NULL} if \code{mock_missing_data} argument is \code{TRUE}.}
 
 \item{comparison_name}{A character string naming a single comparison to extract QC data for (should correspond to the comparison name used in the analysis config JSON file).}
 
@@ -54,6 +54,18 @@ A list containing the following elements:
 }
 \description{
 Produce Quality Control (QC) metrics from the following FGC CRISPR screen data inputs: an analysis config JSON file, a combined counts csv file, a Bagel results tsv file (Control vs Plasmid), a gRNA library tsv file ('cleanr.tsv'), and one or more bcl2fastq2 output JSON files ('Stats.json'). QC output will be returned for a single named comparison.
+}
+\details{
+There are 7 main steps in the function:
+\enumerate{
+\item Check inputs (mock missing data, if needed).
+\item Read data.
+\item QC for sequencing metrics (merge with qc data in analysis config).
+\item Normalize counts and calculate logFC data.
+\item QC for counts and logFC data.
+\item QC for Bagel Bayes Factors.
+\item Wrap up and write out results (mask any mocked columns).
+}
 }
 \author{
 Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}

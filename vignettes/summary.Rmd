@@ -50,9 +50,12 @@ qc <- QC_fgc_crispr_data(analysis_config = "path/to/analysis_config.json",
                          library = "path/to/gRNA-library-file/cleanr.tsv",
                          comparison_name = "Single_Comparison_name",
                          output = "qc-out.csv",
-                         output_R_object = "qc-out")
+                         output_R_object = "qc-out",
+                         mock_missing_data = FALSE)
 
 ```
+
+If `mock_missing_data` is set to `TRUE` (defaults to `FALSE`) then one or both of `bcl2fastq` and `library` can be set to `NULL` and the missing data will be mocked within the function and the mocked columns will be set to `NA` values in the output. When this is the case, a mock 'qc' section will also be included in the analysis config.
 
 A summary of the return object can be printed to the console:
 
