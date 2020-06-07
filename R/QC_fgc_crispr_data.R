@@ -60,6 +60,23 @@
 }
 
 
+.prep_bcl2fastq <- function(bcl2fastq, comparisons, json_list){
+  tryCatch({
+    b2f <- .read_bcl2fastq(bcl2fastq) %>%
+      fgcQC::summarise_samples_bcl2fastq() %>%
+      dplyr::mutate(screen_type = comparisons$type[1],
+                    screen_goal = comparisons$goal[1],
+                    SampleName = json_list$samples$name[match(SampleId, json_list$samples$indexes)],
+                    SampleLabel = json_list$samples$label[match(SampleId, json_list$samples$indexes)]) %>%
+      # Keep only samples in the given comparison.
+      dplyr::filter(SampleName %in% comparisons$sample)
+    return(b2f)
+  },
+  error = function(e) stop(paste(".prep_bcl2fastq: unable to prep bcl2fastq data:",e))
+  )
+}
+
+
 .make_dummy_bagel <- function(gene_set, type){
   tryCatch({
     gene_set$hart_nonessential <- NULL
@@ -130,7 +147,7 @@
 #' * `bagel_PrRc` - A list containing Precision-Recall data for different sample comparisons.
 #' @md
 #' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
-#' @importFrom dplyr mutate select filter right_join left_join everything inner_join case_when
+#' @importFrom dplyr mutate select filter left_join inner_join case_when
 #' @importFrom tibble add_column
 #' @importFrom magrittr %<>%
 #' @export
@@ -189,41 +206,23 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
 
 
   ### QC for sequencing metrics (bcl2fastq2 output).
-  tryCatch({
-    b2f <- .read_bcl2fastq(bcl2fastq) %>%
-      fgcQC::summarise_samples_bcl2fastq() %>%
-      dplyr::mutate(screen_type = comparisons$type[1],
-                    screen_goal = comparisons$goal[1],
-                    SampleName = json_list$samples$name[match(SampleId, json_list$samples$indexes)],
-                    SampleLabel = json_list$samples$label[match(SampleId, json_list$samples$indexes)]) %>%
-      # Keep only samples in the given comparison.
-      dplyr::filter(SampleName %in% comparisons$sample)
+  b2f <- .prep_bcl2fastq(bcl2fastq, comparisons, json_list)
 
-    if(any(!b2f$SampleName %in% qc_config$name))
-      stop(paste("QC_fgc_crispr_data: analysis config QC data missing for:",b2f$SampleName[!b2f$SampleName %in% qc_config$name]))
+  if(any(!b2f$SampleName %in% qc_config$name))
+    stop(paste("QC_fgc_crispr_data: analysis config QC data missing for:",b2f$SampleName[!b2f$SampleName %in% qc_config$name]))
 
-    qc_metrics <- b2f %>%
-      # Fold in QC data from analysis config.
-      dplyr::right_join(qc_config, by = c("SampleName" = "name")) %>%
-      dplyr::mutate(SampleClass = comparisons$class[match(SampleName, comparisons$sample)],
-                    SampleLabel = ifelse(SampleClass == "plasmid",SampleName,SampleLabel)) %>%
-      dplyr::select(slx_id,screen_type,screen_goal,
-                    Flowcell:Q30_bases_samples_percent,
-                    virus_batch,plasmid_batch,cas_activity,minimum_split_cell_number,
-                    SampleId,SampleName,SampleLabel,SampleClass,
-                    dplyr::everything())
-  },
-  error = function(e) stop(paste("QC_fgc_crispr_data: unable to build bcl2fastq data frame:",e))
-  )
+  ## Merge with QC section in analysis config.
+  qc_metrics <- fgcQC::merge_bcl2fastq_config_qc(b2f, qc_config, comparisons)
 
   # Are any samples missing?
   miss_samps <- setdiff(comparisons$sample, qc_metrics$SampleName)
-  if(length(miss_samps) > 0){
+  if(length(miss_samps) > 0)
     stop(paste("QC_fgc_crispr_data: could not find the following comparison samples in the sequencing output (bcl2fastq):",miss_samps))
-  }
+
 
   # Output determined by screen type.
   if(comparisons$type[1] != "a"){
+    ### Prep data for QC metric calculations.
     ## Normalize counts.
     if(norm_method == "median_ratio"){
       counts_norm <- fgcQC::normalize_library_depth_median_ratio(counts)
@@ -270,6 +269,8 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       lfc.treat_pl.repl <- NULL
     }
 
+
+    ### QC metric calculations.
     qc_metrics %<>%
       ### QC for count data.
       fgcQC::assemble_counts_QC(counts, counts_norm, library, plasmid_samp, control_samp, treat_samp) %>%
