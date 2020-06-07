@@ -33,7 +33,7 @@ mock_missing_FGC_data <- function(analysis_config, combined_counts, bcl2fastq, l
   }
 
   # Do we need to mock a 'qc' section in the config?
-  if(!"qc" %in% names(config)){
+  if(!"qc" %in% names(config) || !"date_transduced" %in% colnames(config$qc)){
     analysis_config <- fgcQC::mock_config_qc_section(config, indices, samples)
   }
 

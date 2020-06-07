@@ -2,7 +2,7 @@
 .sanity_check_b2f_out <- function(b2f_list){
   exp_names <- c("Flowcell","RunNumber","RunId","ReadInfosForLanes","ConversionResults","UnknownBarcodes")
   if(!setequal(names(b2f_list), exp_names))
-    stop(paste("bcl2fastq2 expected sections:",exp_names,"found instead:",names(b2f_list)))
+    stop(paste(".sanity_check_b2f_out: bcl2fastq2 expected sections:",exp_names,"found instead:",names(b2f_list)))
 }
 
 
@@ -20,7 +20,6 @@
 #' @importFrom tidyr unnest
 #' @importFrom magrittr %<>%
 #' @export
-#' @examples \dontrun{jj <- extract_b2f_json('Stats.json')}
 extract_b2f_json <- function(path){
   tryCatch({
     all <- jsonlite::fromJSON(path)

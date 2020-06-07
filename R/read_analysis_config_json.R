@@ -9,8 +9,6 @@
 #' @importFrom jsonlite fromJSON
 #' @export
 read_analysis_config_json <- function(file){
-  if(!file.exists(file)) stop(paste("unable to find",file))
-
   expected_sections <- c("samples","comparisons","meta","general","qc")
 
   tryCatch(jlist <- jsonlite::fromJSON(file),
@@ -19,6 +17,10 @@ read_analysis_config_json <- function(file){
   miss <- setdiff(expected_sections, names(jlist))
   if(length(miss) > 0)
     stop(paste("read_analysis_config_json: analysis config is missing expected sections:",paste(miss,collapse=",")))
+
+  # Do we have a 'date_transduced' column in the qc section?
+  if(!"date_transduced" %in% colnames(jlist$qc))
+    stop(paste("read_analysis_config_json: unable to find a 'date_transduced' column in the qc section"))
 
   return(jlist)
 }

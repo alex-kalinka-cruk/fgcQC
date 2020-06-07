@@ -36,6 +36,8 @@ calc_mahalanobis_dist_plasmid <- function(counts, plasmid_sample_id, control_sam
       plasm_min <- min(c(unlist(dist.treat[,plasmid_sample_id])), na.rm = T)
       treat_max <- max(c(unlist(dist.treat[,treat_sample_id])), na.rm = T)
       ret <- cbind(ret, data.frame(mahalanobis_dist_ratio.treat_plasmid = treat_max/plasm_min))
+    }else{
+      ret <- cbind(ret, data.frame(mahalanobis_dist_ratio.treat_plasmid = NA))
     }
   return(ret)
   },

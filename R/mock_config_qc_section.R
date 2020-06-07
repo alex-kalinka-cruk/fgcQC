@@ -14,10 +14,15 @@
 mock_config_qc_section <- function(config, sample_ids, sample_names){
   tryCatch({
     num_samps <- length(sample_ids)
-    qc <- fgcQC::config_qc_metrics %>%
-      dplyr::slice(rep(1:dplyr::n(), each = num_samps)) %>%
-      dplyr::mutate(name = sample_names, indexes = sample_ids)
-    config$qc <- qc
+    if(!"qc" %in% names(config)){
+      qc <- fgcQC::config_qc_metrics %>%
+        dplyr::slice(rep(1:dplyr::n(), each = num_samps)) %>%
+        dplyr::mutate(name = sample_names, indexes = sample_ids)
+      config$qc <- qc
+    }else if(!"date_transduced" %in% colnames(config$qc)){
+      config$qc %<>%
+        dplyr::mutate(date_transduced = "NA")
+    }
     # Are we missing a 'label' column in the config 'samples'?
     if(!"label" %in% colnames(config$samples)){
       config$samples %<>%

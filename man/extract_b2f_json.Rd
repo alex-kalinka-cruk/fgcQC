@@ -15,9 +15,6 @@ A data frame containing flowcell and sample-level sequencing metrics.
 \description{
 Extracts Sequencing QC metrics from a `bcl2fastq2` 'Stats.json' file.
 }
-\examples{
-\dontrun{jj <- extract_b2f_json('Stats.json')}
-}
 \author{
 Alex T. Kalinka, \email{alex.kalinka@cancer.org.uk}
 }

@@ -1,4 +1,10 @@
 # Helper functions.
+.print_progress <- function(msg){
+  msg <- paste(date(), "*** fgcQC:",msg,"\n")
+  cat(msg)
+}
+
+
 .file_exists <- function(file){
   if(!file.exists(file))
     stop(paste(".check_qc_inputs: unable to find",file))
@@ -9,6 +15,8 @@
                              output, output_R_object, norm_method, bagel_treat_plasmid){
   .file_exists(analysis_config)
   .file_exists(combined_counts)
+  if(is.null(library))
+    stop(".check_qc_inputs: a path to a valid cleanr library file is required")
   .file_exists(library)
   if(is.null(bagel_ctrl_plasmid)){
     warning(".check_qc_inputs: no 'bagel_ctrl_plasmid' data available")
@@ -18,7 +26,7 @@
 
   if(!is.null(bagel_treat_plasmid))
     .file_exists(bagel_treat_plasmid)
-  if(!is.character(bcl2fastq))
+  if(!is.character(bcl2fastq) || is.null(bcl2fastq))
     stop(".check_qc_inputs: 'bcl2fastq' must be a comma-separated character string pointing to one or more bcl2fastq2 output JSON files")
   b2f <- unlist(strsplit(bcl2fastq,","))
   sapply(b2f, .file_exists)
@@ -163,6 +171,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
                                bcl2fastq, library, comparison_name, output, output_R_object,
                                norm_method = "median_ratio", mock_missing_data = FALSE){
   ### 1. Prep.
+  .print_progress("Checking data inputs")
   ## Do we need to mock missing inputs?
   if(mock_missing_data){
     mask_bcl2fastq <- bcl2fastq
@@ -194,6 +203,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
 
 
   ### 2. Read data.
+  .print_progress("Reading data")
   # counts.
   tryCatch(counts <- read.delim(combined_counts, sep="\t", header=T, stringsAsFactors = F),
            error = function(e) stop(paste("QC_fgc_crispr_data: unable to read combined counts file",combined_counts,":",e)))
@@ -218,6 +228,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
 
 
   ### 3. QC for sequencing metrics (bcl2fastq2 output).
+  .print_progress("QC for sequencing metrics")
   b2f <- .prep_bcl2fastq(bcl2fastq, comparisons, json_list)
 
   if(any(!b2f$SampleName %in% qc_config$name))
@@ -234,6 +245,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
 
 
   ### 4. Normalize counts and calculate logFC data for QC metric calculations.
+  .print_progress("Normalizing and calculating logFC data")
   # Output determined by screen type.
   if(comparisons$type[1] != "a"){
     ## Normalize counts.
@@ -285,6 +297,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
 
 
     ### 5. QC metric calculations for counts and logFC data.
+    .print_progress("QC for counts and logFC data")
     qc_metrics %<>%
       ### QC for count data.
       fgcQC::assemble_counts_QC(counts, counts_norm, library, plasmid_samp, control_samp, treat_samp) %>%
@@ -294,6 +307,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
 
 
     ### 6. QC for Bagel binary classification data.
+    .print_progress("QC for Bagel Bayes Factors")
     if(!is.null(bagel_ctrl_plasmid)){
       bagel_roc <- fgcQC::add_bagel_ROC_gene_sets(bagel_ctrl_plasmid, bagel_treat_plasmid,
                                                 fgcQC::crispr_gene_sets$essential)
@@ -314,6 +328,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
 
 
   ### 7. Wrap up, write out results, and prep return object.
+  .print_progress("Wrapping up and saving QC results")
   # Mask mocked columns, if needed.
   if(mock_missing_data){
     qc_metrics <- .add_masks_mocked_columns(qc_metrics, mask_bcl2fastq, mask_library)
@@ -355,7 +370,10 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
 
   # Save R object.
   if(!is.null(output_R_object)){
-    tryCatch(saveRDS(ret, file = paste(output_R_object,".rds",sep=""), compress="xz", version=2),
+    if(!grepl("\\.rds$",output_R_object)){
+      output_R_object <- paste(output_R_object,".rds",sep="")
+    }
+    tryCatch(saveRDS(ret, file = output_R_object, compress="xz", version=2),
              error = function(e) stop(paste("QC_fgc_crispr_data: unable to save R object")))
   }
   ##-----------------------------------
