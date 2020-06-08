@@ -3,8 +3,8 @@ Summary
 
 `fgcQC` is an `R` package that provides implementations of CRISPR QC
 metric calcluations pertaining to sequencing, laboratory, and analysis
-metrics - both standard and novel metrics are included. It is designed
-to ingest data produced by the [AZ-CRUK CRISPR analysis
+data - both standard and novel metrics are included. It is designed to
+ingest data produced by the [AZ-CRUK CRISPR analysis
 pipeline](https://bitbucket.astrazeneca.com/projects/DA/repos/az-cruk-crispr-pipeline/browse).
 
 Dependencies
@@ -55,7 +55,9 @@ Usage
 
 In the below command, multiple `bcl2fastq` `Stats.json` files can be
 provided in a single comma-separated string. For ‘lethality’ screens,
-set the argument `bagel_treat_plasmid` to `NULL`.
+set the argument `bagel_treat_plasmid` to `NULL` (`bagel_ctrl_plasmid`
+may also be set to `NULL` in case Bagel was unable to produce any
+output).
 
     qc <- QC_fgc_crispr_data(analysis_config = "path/to/analysis_config.json",
                              combined_counts = "path/to/combined_counts.csv",
@@ -65,7 +67,15 @@ set the argument `bagel_treat_plasmid` to `NULL`.
                              library = "path/to/gRNA-library-file/cleanr.tsv",
                              comparison_name = "Single_Comparison_name",
                              output = "qc-out.csv",
-                             output_R_object = "qc-out")
+                             output_R_object = "qc-out",
+                             mock_missing_data = FALSE)
+
+If `mock_missing_data` is set to `TRUE` (defaults to `FALSE`) then one
+or both of `bcl2fastq` and `library` can be set to `NULL` and the
+missing data will be mocked within the function and the mocked column
+data will be set to `NA` values in the output. When this is the case, a
+mock ‘qc’ section will also be included in the analysis config if it is
+missing.
 
 A summary of the return object can be printed to the console:
 

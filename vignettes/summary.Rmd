@@ -39,7 +39,7 @@ vignette: >
 
 # Usage
 
-In the below command, multiple `bcl2fastq` `Stats.json` files can be provided in a single comma-separated string. For 'lethality' screens, set the argument `bagel_treat_plasmid` to `NULL`.
+In the below command, multiple `bcl2fastq` `Stats.json` files can be provided in a single comma-separated string. For 'lethality' screens, set the argument `bagel_treat_plasmid` to `NULL` (`bagel_ctrl_plasmid` may also be set to `NULL` in case Bagel was unable to produce any output).
 
 ```{r,eval=F}
 qc <- QC_fgc_crispr_data(analysis_config = "path/to/analysis_config.json",
@@ -55,7 +55,7 @@ qc <- QC_fgc_crispr_data(analysis_config = "path/to/analysis_config.json",
 
 ```
 
-If `mock_missing_data` is set to `TRUE` (defaults to `FALSE`) then one or both of `bcl2fastq` and `library` can be set to `NULL` and the missing data will be mocked within the function and the mocked columns will be set to `NA` values in the output. When this is the case, a mock 'qc' section will also be included in the analysis config if it is missing.
+If `mock_missing_data` is set to `TRUE` (defaults to `FALSE`) then one or both of `bcl2fastq` and `library` can be set to `NULL` and the missing data will be mocked within the function and the mocked column data will be set to `NA` values in the output. When this is the case, a mock 'qc' section will also be included in the analysis config if it is missing.
 
 A summary of the return object can be printed to the console:
 

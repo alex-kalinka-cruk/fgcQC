@@ -170,6 +170,7 @@
 QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plasmid, bagel_treat_plasmid,
                                bcl2fastq, library, comparison_name, output, output_R_object,
                                norm_method = "median_ratio", mock_missing_data = FALSE){
+  cat(paste("*** fgcQC version:",utils::packageVersion("fgcQC"),"\n"))
   ### 1. Prep.
   .print_progress("Checking data inputs")
   ## Do we need to mock missing inputs?
@@ -374,7 +375,7 @@ QC_fgc_crispr_data <- function(analysis_config, combined_counts, bagel_ctrl_plas
       output_R_object <- paste(output_R_object,".rds",sep="")
     }
     tryCatch(saveRDS(ret, file = output_R_object, compress="xz", version=2),
-             error = function(e) stop(paste("QC_fgc_crispr_data: unable to save R object")))
+             error = function(e) stop(paste("QC_fgc_crispr_data: unable to save R object",output_R_object,":",e)))
   }
   ##-----------------------------------
 
