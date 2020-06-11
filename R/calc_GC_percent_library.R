@@ -8,6 +8,7 @@
 #' @author Alex T. Kalinka, \email{alex.kalinka@@cancer.org.uk}
 #' @importFrom dplyr mutate rowwise ungroup
 #' @importFrom magrittr %<>%
+#' @export
 calc_GC_percent_library <- function(library){
   tryCatch({
     guide_len <- nchar(library$V1[1])
