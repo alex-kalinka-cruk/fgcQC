@@ -46,8 +46,10 @@ normalize_library_depth_median_ratio <- function(counts){
   tryCatch({
     size_factors <- counts %>%
       fgcQC::calc_median_normalization_size_factors()
+    # Make sure none of the size factors are 0.
+    size_factors <- apply(size_factors, 2, function(x) ifelse(x==0,1,x))
     counts[,3:ncol(counts)] <- as.data.frame(t(apply(counts[,3:ncol(counts)],
-                                                     1, function(x) x/c(unlist(size_factors)))))
+                                                     1, function(x) x/size_factors)))
   },
   error = function(e) stop(paste("unable to calculate median ratio normalization:",e))
   )
