@@ -1,6 +1,6 @@
 Package: fgcQC
 Title: QC metric calculations for CRISPR screen data produced at the FGC
-Version: 0.2.3
+Version: 0.2.4
 Authors@R: 
     person(given = "Alex",
            family = "Kalinka",
